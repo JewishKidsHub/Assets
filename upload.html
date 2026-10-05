@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JKH Uploader</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800&display=swap');
+  :root{
+    --navy:#F9681F; --blue:#FF9900; --blue-dark:#c97300; --sun:#FFD24D; --sky:#FFFBF0;
+    --ok:#1f9d55; --err:#d64545; --ink:#3a2a14; --muted:#8a7a63; --line:#f1e3c4;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink); background:linear-gradient(180deg,#FF9900 0,#F9681F 190px,var(--sky) 190px);
+    padding:20px 16px 40px;
+  }
+  .wrap{max-width:520px;margin:0 auto}
+  header{color:#fff;text-align:center;padding:8px 0 26px}
+  .logo{
+    display:block;margin:0 auto;max-width:150px;max-height:110px;width:auto;height:auto;
+    filter:drop-shadow(0 4px 0 rgba(0,0,0,.15));
+  }
+  .logo-fallback{
+    display:none;align-items:center;justify-content:center;margin:0 auto;
+    width:72px;height:72px;border-radius:22px;background:var(--sun);color:#F9681F;
+    font-family:"Fredoka",sans-serif;font-weight:700;font-size:26px;box-shadow:0 6px 0 rgba(0,0,0,.18);
+  }
+  h1{margin:12px 0 2px;font-size:26px;font-family:"Fredoka",sans-serif;font-weight:700}
+  header p{margin:0;opacity:.8;font-size:14px}
+  .card{background:#fff;border-radius:20px;padding:18px;box-shadow:0 10px 30px rgba(249,104,31,.18);margin-bottom:14px}
+  label{display:block;font-weight:700;font-size:13px;margin:0 0 6px;color:#F9681F}
+  input[type=text],input[type=password]{
+    width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;font-size:16px;margin-bottom:14px;
+  }
+  input:focus{outline:none;border-color:var(--blue)}
+  .drop{
+    border:2px dashed #f0c987;border-radius:16px;padding:26px 12px;text-align:center;
+    background:var(--sky);cursor:pointer;margin-bottom:14px;transition:.15s;
+  }
+  .drop.over{border-color:var(--blue);background:#ffefc2}
+  .drop .big{font-size:34px}
+  .drop b{display:block;color:#F9681F;margin-top:4px}
+  .drop small{color:var(--muted)}
+  .drop input{display:none}
+  button{font-family:"Fredoka",sans-serif;
+    width:100%;padding:14px;border:0;border-radius:14px;font-size:17px;font-weight:800;cursor:pointer;
+    background:var(--blue);color:#fff;box-shadow:0 4px 0 var(--blue-dark);
+  }
+  button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--blue-dark)}
+  button:disabled{opacity:.5}
+  .link{background:none;box-shadow:none;color:var(--muted);font-size:13px;font-weight:600;padding:8px;width:auto;margin:6px auto 0;display:block}
+  .row{display:flex;gap:8px}
+  .row button{width:auto;padding:8px 12px;font-size:13px;box-shadow:none;background:var(--sun);color:#3a2a14;border-radius:10px}
+  .item{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+  .item .name{font-weight:700;word-break:break-all}
+  .bar{height:6px;background:var(--line);border-radius:6px;margin:8px 0;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--blue);transition:width .2s}
+  .ok{color:var(--ok)} .err{color:var(--err)}
+  .url{font-size:12px;color:var(--muted);word-break:break-all;margin:6px 0}
+  .hint{font-size:12px;color:var(--muted);margin:-6px 0 14px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img class="logo" alt="JKH"
+         src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w400"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="logo-fallback">JKH</div>
+    <h1>Jewish Kids Hub</h1>
+    <p>Asset uploader</p>
+  </header>
+
+  <!-- Token setup (shown only when no token saved) -->
+  <div class="card" id="tokenCard">
+    <label for="tok">GitHub token</label>
+    <input type="password" id="tok" placeholder="github_pat_..." autocomplete="off">
+    <button id="saveTok">Save token</button>
+    <div class="hint" style="margin:10px 0 0">Saved only in this browser. Never put it inside this file.</div>
+  </div>
+
+  <!-- Uploader -->
+  <div class="card hidden" id="upCard">
+    <label for="folder">Folder (optional)</label>
+    <input type="text" id="folder" placeholder="e.g. images/magazine">
+    <div class="hint">Leave empty to upload to the main folder.</div>
+
+    <label class="drop" id="drop">
+      <div class="big">📁</div>
+      <b>Tap to choose files</b>
+      <small>or drag them here · max ~25MB each</small>
+      <input type="file" id="files" multiple>
+    </label>
+
+    <div id="list"></div>
+
+    <button id="go" disabled>Upload</button>
+    <button class="link" id="changeTok">Change token</button>
+  </div>
+</div>
+
+<script>
+// ===== Settings =====
+const OWNER  = "JewishKidsHub";
+const REPO   = "Assets";
+const BRANCH = "main";
+// ====================
+
+const $ = id => document.getElementById(id);
+let queue = [];
+
+function getToken(){ try{ return localStorage.getItem("gh_token"); }catch(e){ return null; } }
+function setToken(t){ try{ t ? localStorage.setItem("gh_token", t) : localStorage.removeItem("gh_token"); }catch(e){} }
+
+function show(){
+  const has = !!getToken();
+  $("tokenCard").classList.toggle("hidden", has);
+  $("upCard").classList.toggle("hidden", !has);
+}
+$("saveTok").onclick = () => {
+  const t = $("tok").value.trim();
+  if(!t) return;
+  setToken(t); $("tok").value = ""; show();
+};
+$("changeTok").onclick = () => { setToken(null); show(); };
+
+// File picking
+$("files").onchange = e => addFiles([...e.target.files]);
+const drop = $("drop");
+["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
+
+function addFiles(fs){
+  fs.forEach(f => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = `<div class="name"></div><div class="bar"><i></i></div><div class="status"></div>`;
+    el.querySelector(".name").textContent = f.name + "  (" + (f.size/1048576).toFixed(2) + " MB)";
+    if(f.size > 25*1048576) el.querySelector(".status").innerHTML = '<span class="err">Big file, may fail. Use GitHub web upload instead.</span>';
+    $("list").appendChild(el);
+    queue.push({file:f, el});
+  });
+  $("go").disabled = queue.length === 0;
+}
+
+function toB64(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(",")[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function uploadOne(item){
+  const {file, el} = item;
+  const bar = el.querySelector(".bar i"), st = el.querySelector(".status");
+  const token = getToken();
+  const folder = $("folder").value.trim().replace(/^\/+|\/+$/g, "");
+  const path = (folder ? folder + "/" : "") + file.name;
+  const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/` +
+                 path.split("/").map(encodeURIComponent).join("/");
+  const headers = { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" };
+
+  st.textContent = "Reading file..."; bar.style.width = "20%";
+  const content = await toB64(file);
+
+  st.textContent = "Checking for existing file..."; bar.style.width = "40%";
+  let sha;
+  const chk = await fetch(apiUrl + "?ref=" + BRANCH, { headers });
+  if(chk.status === 401){ setToken(null); throw new Error("Token rejected. Please enter a new one."); }
+  if(chk.ok) sha = (await chk.json()).sha;
+
+  st.textContent = "Uploading..."; bar.style.width = "70%";
+  const res = await fetch(apiUrl, {
+    method: "PUT",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ message: "Upload " + path, content, branch: BRANCH, sha })
+  });
+  if(res.status === 401){ setToken(null); throw new Error("Token rejected. Please enter a new one."); }
+  if(!res.ok){
+    let m = res.status; try{ m = (await res.json()).message; }catch(e){}
+    throw new Error(m);
+  }
+
+  bar.style.width = "100%";
+  const pub = new URL(path.split("/").map(encodeURIComponent).join("/"), location.href).href;
+  st.innerHTML = `<span class="ok">✅ Uploaded${sha ? " (replaced old file)" : ""}</span>
+    <div class="url">${pub}</div>
+    <div class="row"><button type="button">Copy link</button></div>
+    <div class="hint" style="margin:6px 0 0">Goes live in ~20 seconds.</div>`;
+  st.querySelector("button").onclick = e => {
+    navigator.clipboard.writeText(pub); e.target.textContent = "Copied!";
+  };
+}
+
+$("go").onclick = async () => {
+  $("go").disabled = true;
+  const todo = queue; queue = [];
+  for(const item of todo){
+    try{ await uploadOne(item); }
+    catch(err){
+      item.el.querySelector(".status").innerHTML = `<span class="err">❌ ${err.message}</span>`;
+      if(!getToken()){ show(); break; }
+    }
+  }
+  $("files").value = "";
+};
+
+show();
+</script>
+</body>
+</html>
