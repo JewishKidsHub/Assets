@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Jewish Kids Hub</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    font-family:'Nunito',system-ui,sans-serif;color:#3a2a14;background:linear-gradient(180deg,#FF9900 0,#F9681F 45%,#FFFBF0 45%);}
+  .card{background:#fff;border-radius:24px;padding:30px 26px;max-width:420px;width:100%;text-align:center;box-shadow:0 14px 40px rgba(249,104,31,.25);}
+  .card img{width:110px;height:auto;margin:0 auto 8px}
+  h1{font-family:'Fredoka',sans-serif;font-size:24px;margin:6px 0 8px}
+  p{margin:0 0 16px;color:#8a7a63;font-size:15px}
+  .spin{width:34px;height:34px;border:4px solid #FFE3A8;border-top-color:#FF9900;border-radius:50%;animation:s 1s linear infinite;margin:0 auto 14px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  a.btn{display:inline-block;background:#FF9900;color:#fff;text-decoration:none;font-family:'Fredoka',sans-serif;font-weight:600;padding:12px 24px;border-radius:14px;box-shadow:0 4px 0 #c97300}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<!--
+  This page is self-contained, so it works on ANY domain that serves it.
+  The short name is read from the address:  yourdomain.com/name   (the old yourdomain.com/go/name still works too)
+  It needs only this file plus a redirect rule:  /*  /go.html  200
+-->
+<div class="card">
+  <img src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w400" alt="Jewish Kids Hub" onerror="this.style.display='none'">
+  <div id="loading"><div class="spin"></div><h1>Taking you there…</h1><p id="dest">One moment!</p>
+    <a class="btn hide" id="manual" href="#">Tap here if nothing happens</a></div>
+  <div id="notfound" class="hide"><h1>Oops! Link not found</h1><p>This link doesn't exist or was removed.</p><a class="btn" href="https://jewishkidshub.com">Go to Jewish Kids Hub</a></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+(function(){
+  firebase.initializeApp({
+    apiKey: "AIzaSyAYsM6O7rmWDD7UWaIsUfZGZndjhRQorGg",
+    authDomain: "jewish-kids-hub.firebaseapp.com",
+    databaseURL: "https://jewish-kids-hub-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "jewish-kids-hub"
+  });
+  const db = firebase.database();
+
+  const parts = location.pathname.split('/').filter(Boolean);
+  if(parts[0] === 'go') parts.shift();                       // old style /go/name
+  let slug = new URLSearchParams(location.search).get('id') || (parts.length === 1 ? parts[0] : '');
+  try{ slug = decodeURIComponent(slug || ''); }catch(e){ slug = ''; }
+  slug = slug.toLowerCase().replace(/[^a-z0-9-_]/g, '');
+
+  const notFound = () => { document.getElementById('loading').classList.add('hide'); document.getElementById('notfound').classList.remove('hide'); };
+  if(!slug) return notFound();
+
+  db.ref('shortLinks/' + slug).once('value').then(snap => {
+    const v = snap.val();
+    if(!v || !/^https?:\/\//i.test(v.url || '')) return notFound();
+    document.getElementById('dest').textContent = v.note || 'One moment!';
+    const m = document.getElementById('manual'); m.href = v.url; m.classList.remove('hide');
+    // best-effort click counter (ignored if database rules don't allow it)
+    db.ref('shortLinks/' + slug + '/clicks').transaction(n => (n || 0) + 1).catch(()=>{});
+    setTimeout(() => location.replace(v.url), 600);
+  }).catch(notFound);
+})();
+</script>
+</body>
+</html>

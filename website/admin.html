@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jewish Kids Hub — Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://jewish-kids-hub-default-rtdb.asia-southeast1.firebasedatabase.app">
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+  #login-screen{min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(255,153,0,.12), rgba(255,210,77,.08));}
+  #admin-app{display:none;}
+  .admin-layout{display:flex; min-height:100vh;}
+  .admin-sidebar{width:230px; flex-shrink:0; background:var(--choc); color:var(--bg); padding:20px 14px; display:flex; flex-direction:column;}
+  .admin-brand{display:flex; align-items:center; gap:9px; padding:6px 8px 18px;}
+  .admin-brand img{width:34px; height:34px; border-radius:50%;}
+  .admin-brand span{font-family:'Fredoka'; font-weight:700; font-size:15px; color:#fff;}
+  .admin-group-label{font-size:11px; font-weight:800; opacity:.6; letter-spacing:.06em; text-transform:uppercase; margin:16px 0 6px 12px; color:var(--secondary);}
+  .admin-nav-item{display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; font-weight:700; font-size:13.5px; color:var(--bg); opacity:.8; border:none; background:none; width:100%; text-align:left; transition:.15s;}
+  .admin-nav-item:hover{background:rgba(255,255,255,.08); opacity:1;}
+  .admin-nav-item.active{background:var(--primary); color:#fff; opacity:1;}
+  .admin-foot{margin-top:auto; padding-top:14px; border-top:1px solid rgba(255,255,255,.12);}
+  .admin-foot .signout{color:var(--secondary);}
+  .admin-main{flex:1; padding:28px 34px; overflow-x:auto; background:var(--bg);}
+  .admin-topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:10px;}
+  .section-panel{display:none;} .section-panel.active{display:block; animation:fade .3s ease;}
+  .stat-grid2{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  @media(max-width:1000px){.stat-grid2{grid-template-columns:1fr 1fr;}}
+  .stat-card2{background:#fff; border:1px solid var(--muted); border-radius:20px; padding:20px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow); animation:fade .4s ease;}
+  .stat-grid2 .stat-card2:nth-child(1){animation-delay:.02s;} .stat-grid2 .stat-card2:nth-child(2){animation-delay:.06s;}
+  .stat-grid2 .stat-card2:nth-child(3){animation-delay:.10s;} .stat-grid2 .stat-card2:nth-child(4){animation-delay:.14s;}
+  .stat-grid2 .stat-card2:nth-child(5){animation-delay:.18s;} .stat-grid2 .stat-card2:nth-child(6){animation-delay:.22s;}
+  .stat-grid2 .stat-card2:nth-child(7){animation-delay:.26s;} .stat-grid2 .stat-card2:nth-child(8){animation-delay:.30s;}
+  .stat-grid2 .stat-card2:nth-child(9){animation-delay:.34s;} .stat-grid2 .stat-card2:nth-child(10){animation-delay:.38s;}
+  .stat-card2:hover{transform:translateY(-3px); transition:transform .2s ease;}
+  .stat-ic2{width:48px; height:48px; border-radius:14px; background:var(--muted); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;}
+  .stat-card2 b{font-size:24px; display:block; font-family:'Fredoka';} .stat-card2 span{font-size:12.5px; color:var(--fg-soft);}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;}
+  .toolbar-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:16px; overflow:hidden; border:1px solid var(--muted);}
+  th,td{padding:11px 14px; text-align:left; font-size:13.5px; border-bottom:1px solid var(--muted);}
+  th{background:var(--muted); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--fg-soft);}
+  tr:last-child td{border-bottom:none;}
+  .row-actions{display:flex; gap:6px; flex-wrap:wrap;}
+  .icon-btn{border:1px solid var(--muted); background:#fff; border-radius:8px; padding:5px 9px; font-size:12px;}
+  .icon-btn.danger{color:var(--accent); border-color:var(--accent);}
+  .icon-btn.good{color:#2E7D4F; border-color:#2E7D4F;}
+  .pill2{background:var(--muted); color:var(--accent); font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px;}
+  .pill2.on{background:#DDF3E4; color:#2E7D4F;}
+  .pill2.admin{background:#FFE4CC; color:var(--accent);}
+  .empty-row td{text-align:center; color:var(--fg-soft); padding:30px;}
+  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(50,38,27,.45); z-index:80; align-items:center; justify-content:center; padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal-card{background:#fff; border-radius:22px; padding:28px 30px; max-width:480px; width:100%; max-height:88vh; overflow:auto; animation:popIn .25s ease;}
+  .richtext-preview{border:1px solid var(--muted); border-radius:12px; padding:14px 16px; max-height:120px; overflow:hidden; font-size:13px; color:var(--fg-soft); position:relative; margin-bottom:10px; background:#fafafa;}
+  .richtext-preview::after{content:""; position:absolute; bottom:0; left:0; right:0; height:36px; background:linear-gradient(rgba(250,250,250,0), #fafafa);}
+  .richtext-preview:empty::before{content:"Nothing written yet."; color:var(--fg-soft); font-style:italic;}
+  .open-editor-btn{background:var(--choc); color:#fff; border:none; border-radius:10px; padding:11px 18px; font-weight:800; font-size:13.5px; width:100%;}
+
+  #fullscreen-editor-overlay{display:none; position:fixed; inset:0; background:#fff; z-index:300; flex-direction:column;}
+  #fullscreen-editor-overlay.active{display:flex;}
+  .fse-topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-bottom:1px solid var(--muted); flex-shrink:0;}
+  .fse-topbar h3{font-size:1.05rem;}
+  .fse-topbar-actions{display:flex; gap:10px;}
+  .fse-body{flex:1; overflow:hidden; display:flex; flex-direction:column;}
+  #quill-editor-fullscreen{flex:1; display:flex; flex-direction:column; overflow:hidden;}
+  #quill-editor-fullscreen .ql-toolbar{flex-shrink:0; border-left:none; border-right:none; border-top:none;}
+  #quill-editor-fullscreen .ql-container{flex:1; overflow:auto; border:none; font-size:16px;}
+  #quill-editor-fullscreen .ql-editor{max-width:760px; margin:0 auto; padding:30px 24px 120px;}
+  .modal-actions{display:flex; gap:10px; margin-top:20px;}
+  .btn-ghost{background:var(--muted); color:var(--fg); border:none; border-radius:999px; font-weight:800; font-size:13.5px; padding:10px 20px; flex:1;}
+  .btn-sm{padding:9px 16px; font-size:13px;}
+  .stub-card{background:#fff; border:1px dashed var(--primary); border-radius:20px; padding:30px; color:var(--fg-soft); font-size:13.5px; line-height:1.6;}
+  #quill-editor{height:220px; background:#fff;}
+  .ql-toolbar.ql-snow{border-radius:10px 10px 0 0; border-color:var(--muted);}
+  .ql-container.ql-snow{border-radius:0 0 10px 10px; border-color:var(--muted); font-family:'Nunito';}
+  .thumb-preview{width:64px; height:36px; border-radius:6px; object-fit:cover; background:var(--muted);}
+  .img-upload-row{display:flex; gap:8px; align-items:center;}
+  .img-upload-row input[type="text"], .img-upload-row input:not([type]){flex:1;}
+  .upload-btn{border:1px solid var(--muted); background:var(--muted); border-radius:10px; padding:10px 14px; font-size:13px; font-weight:700; flex-shrink:0; white-space:nowrap;}
+  .settings-card{background:#fff; border:1px solid var(--muted); border-radius:20px; padding:26px 28px; max-width:640px; box-shadow:var(--shadow);}
+  .settings-card h4{font-size:15px; margin-bottom:16px;}
+  .img-field-row{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .img-field-row .thumb-preview{width:52px; height:52px; border-radius:10px; flex-shrink:0;}
+  .img-field-row .field-inner{flex:1;}
+  .toggle-row{display:flex; align-items:center; gap:10px; margin-bottom:14px; font-weight:700; font-size:13.5px;}
+  .analytics-bar-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .analytics-bar-label{width:110px; font-size:12.5px; font-weight:700; flex-shrink:0; text-transform:capitalize;}
+  .analytics-bar-track{flex:1; background:var(--muted); border-radius:8px; height:22px; overflow:hidden;}
+  .analytics-bar-fill{background:linear-gradient(90deg,var(--primary),var(--accent)); height:100%; border-radius:8px; transition:width .5s ease;}
+  .analytics-bar-count{width:48px; text-align:right; font-weight:800; font-size:13px; flex-shrink:0;}
+  .comment-filter{display:flex; gap:8px; margin-bottom:16px;}
+  .comment-filter button{border:1px solid var(--muted); background:#fff; border-radius:999px; padding:7px 16px; font-size:12.5px; font-weight:700;}
+  .comment-filter button.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+  @media(max-width:820px){
+    .admin-layout{flex-direction:column;}
+    .admin-sidebar{width:100%; flex-direction:row; overflow-x:auto;}
+    .admin-brand,.admin-group-label,.admin-foot{display:none;}
+    .admin-nav-item{flex-direction:column; font-size:10px; white-space:nowrap;}
+    table{font-size:12px;}
+  }
+
+  /* ---- file uploader ---- */
+  .ghu-drop{border:2px dashed var(--secondary); border-radius:16px; padding:26px 12px; text-align:center; background:var(--bg); cursor:pointer; display:block; margin-bottom:14px; transition:.15s;}
+  .ghu-drop.over{border-color:var(--primary); background:#FFF1CC;}
+  .ghu-drop .big{font-size:34px;} .ghu-drop b{display:block; margin-top:4px; font-family:'Fredoka';} .ghu-drop small{color:var(--fg-soft);}
+  .ghu-drop input{display:none;}
+  .ghu-item{border:1px solid var(--muted); border-radius:14px; padding:10px 12px; margin-bottom:10px; font-size:13.5px; background:#fff;}
+  .ghu-item .nm{font-weight:700; word-break:break-all;}
+  .ghu-bar{height:6px; background:var(--muted); border-radius:6px; margin:8px 0; overflow:hidden;}
+  .ghu-bar i{display:block; height:100%; width:0; background:var(--primary); transition:width .2s;}
+  .ghu-ok{color:#2E7D4F; font-weight:700;} .ghu-err{color:#D64545; font-weight:700;}
+  .ghu-url{font-size:12px; color:var(--fg-soft); word-break:break-all; margin:6px 0;}
+  /* ---- upload rules & admin settings ---- */
+  .up-kind{border:1px solid var(--muted); border-radius:14px; padding:12px 14px; margin-bottom:12px; background:#fff;}
+  .up-kind-h{display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;}
+  .up-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .up-wide{grid-column:1/-1;}
+  @media(max-width:600px){.up-grid{grid-template-columns:1fr;}}
+  .up-prev{font-size:12px; color:var(--fg-soft); margin-top:10px; word-break:break-all;}
+  .swatch{width:36px; height:36px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 2px var(--muted); cursor:pointer; padding:0;}
+  .swatch.on{box-shadow:0 0 0 3px #3a2a14;}
+  #up-progress{position:fixed; left:50%; bottom:22px; transform:translate(-50%,30px); width:min(420px,calc(100vw - 28px)); background:#fff; border-radius:18px; box-shadow:0 14px 40px rgba(50,38,27,.28); padding:14px 16px; z-index:9998; opacity:0; pointer-events:none; transition:.25s;}
+  #up-progress.show{opacity:1; transform:translate(-50%,0);}
+  .up-p-top{display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:8px; font-size:13.5px;}
+  .up-p-label{font-family:'Fredoka'; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .up-p-pct{font-family:'Fredoka'; font-weight:700; font-size:1.15rem; color:var(--primary);}
+  .up-p-bar{height:10px; background:var(--muted); border-radius:999px; overflow:hidden;}
+  .up-p-bar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--secondary),var(--primary)); border-radius:999px; transition:width .15s;}
+  #up-progress.done .up-p-pct{color:#2E7D4F;}
+  .confetti-bit{position:fixed; top:-30px; z-index:9999; pointer-events:none; animation:confettiFall 2.6s ease-in forwards;}
+  @keyframes confettiFall{to{transform:translateY(110vh) rotate(540deg); opacity:.9;}}
+</style>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="auth-card" style="max-width:360px;">
+    <img class="auth-card-logo" data-imgkey="logo" src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w1000" alt="logo">
+    <h2>Admin Sign In</h2>
+    <p class="sub">Jewish Kids Hub content dashboard</p>
+    <button class="btn google" onclick="doGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.8 18.9 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.6 6 29.6 4 24 4 16 4 9 8.5 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9 39.4 16 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.6 5.4C41.5 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-divider">or</div>
+    <label>Email</label><input type="email" id="login-email" placeholder="you@jewishkidshub.com">
+    <label style="margin-top:12px;">Password</label><input type="password" id="login-password" placeholder="••••••••">
+    <button class="btn" style="width:100%;margin-top:16px;" onclick="doLogin()">Sign In</button>
+    <div class="auth-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="verify-screen" style="display:none;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,153,0,.12), rgba(255,210,77,.08));">
+  <div class="auth-card" style="max-width:380px;">
+    <img class="auth-card-logo" src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w1000" alt="logo">
+    <h2>Verify it's you</h2>
+    <p class="sub" id="vf-sub">We'll email a 6-digit code to your Jewish Kids Hub email.</p>
+    <button class="btn" id="vf-send" onclick="vfSend()">📧 Email me a code</button>
+    <div id="vf-codebox" style="display:none;">
+      <label style="margin-top:14px;display:block;">Enter the code</label>
+      <input type="text" id="vf-code" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code" style="text-align:center;font-size:22px;letter-spacing:6px;">
+      <button class="btn" onclick="vfCheck()">Verify</button>
+    </div>
+    <div class="auth-error" id="vf-msg"></div>
+    <button class="btn" style="background:none;color:var(--fg-soft);box-shadow:none;margin-top:6px;" onclick="auth.signOut();location.reload()">Sign out</button>
+  </div>
+</div>
+
+<div id="admin-app">
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="admin-brand"><img data-imgkey="logo" src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w1000" alt="logo"><span>JKH Admin</span></div>
+
+      <div class="admin-group-label">Overview</div>
+      <button class="admin-nav-item active" data-section="dashboard">▦ Dashboard</button>
+      <button class="admin-nav-item" data-section="analytics">📊 Analytics</button>
+
+      <div class="admin-group-label">Content</div>
+      <button class="admin-nav-item" data-section="pageimages">🖼️ Page Images</button>
+      <button class="admin-nav-item" data-section="homepage">🏠 Homepage</button>
+      <button class="admin-nav-item" data-section="kkavideos">📺 KKA Videos</button>
+      <button class="admin-nav-item" data-section="nachvideos">🛡️ Nach Heroes</button>
+      <button class="admin-nav-item" data-section="audio">🎧 Audio</button>
+      <button class="admin-nav-item" data-section="magazine">📖 Magazine</button>
+      <button class="admin-nav-item" data-section="halachos">📄 Halachos</button>
+
+      <div class="admin-group-label">Engage</div>
+      <button class="admin-nav-item" data-section="notifications">🔔 Notifications</button>
+      <button class="admin-nav-item" data-section="messages">👥 Messages</button>
+      <button class="admin-nav-item" data-section="magsignups">📄 Mag Signups</button>
+      <button class="admin-nav-item" data-section="comments">💬 Comments</button>
+      <button class="admin-nav-item" data-section="answers">🙋 Answers</button>
+      <button class="admin-nav-item" data-section="sendemail">✉️ Send Email</button>
+
+      <div class="admin-group-label">Settings</div>
+      <button class="admin-nav-item" data-section="adminsettings">⚙️ Admin Settings</button>
+      <button class="admin-nav-item" data-section="users">🛡️ Manage Users</button>
+      <button class="admin-nav-item" data-section="fileupload">⬆️ Upload Files</button>
+      <button class="admin-nav-item" data-section="shortlinks">🔗 Short Links</button>
+
+      <div class="admin-foot">
+        <button class="admin-nav-item" onclick="location.href='/index.html'">← Back to Site</button>
+        <button class="admin-nav-item signout" onclick="doLogout()">⏻ Sign Out</button>
+      </div>
+    </div>
+
+    <div class="admin-main">
+      <div class="admin-topbar"><h2 id="section-title">Dashboard</h2><span id="who-label" style="font-size:13px;color:var(--fg-soft);"></span></div>
+
+      <div class="section-panel active" id="panel-dashboard">
+        <div class="stat-grid2">
+          <div class="stat-card2"><div class="stat-ic2">📺</div><div><b id="stat-kka">0</b><span>KKA Videos</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🛡️</div><div><b id="stat-nach">0</b><span>Nach Heroes</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🎧</div><div><b id="stat-audio">0</b><span>Audio Episodes</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">📖</div><div><b id="stat-magazines">0</b><span>Magazine Issues</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">📄</div><div><b id="stat-halachos">0</b><span>Halacha Articles</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">💬</div><div><b id="stat-messages">0</b><span>Messages</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">📄</div><div><b id="stat-magsignups">0</b><span>Mag Signups</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🙋</div><div><b id="stat-users">0</b><span>Registered Users</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">👁️</div><div><b id="stat-totalviews">0</b><span>Total Page Views</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">💭</div><div><b id="stat-comments">0</b><span>Comments</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🙋</div><div><b id="stat-answers">0</b><span>Question Answers</span></div></div>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-analytics">
+        <div class="stat-grid2" style="margin-bottom:20px;">
+          <div class="stat-card2"><div class="stat-ic2">👁️</div><div><b id="an-stat-views">0</b><span>Total Page Views</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🎬</div><div><b id="an-stat-episode-views">0</b><span>Episode/Article Views</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">💭</div><div><b id="an-stat-comments">0</b><span>Comments</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🙋</div><div><b id="an-stat-answers">0</b><span>Q&amp;A Answers</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">👶</div><div><b id="an-stat-children">0</b><span>Children Registered</span></div></div>
+          <div class="stat-card2"><div class="stat-ic2">🙋‍♂️</div><div><b id="an-stat-correct-rate">—</b><span>Answers Correct</span></div></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%; margin-bottom:20px;">
+          <h4>Page Views</h4>
+          <div id="analytics-bars"><p style="color:var(--fg-soft);font-size:13px;">Loading…</p></div>
+          <p class="form-note" style="margin-top:18px;">Each page logs a view automatically when someone loads it. This is a simple visit counter — it doesn't track individual visitors, sessions, or where traffic comes from.</p>
+        </div>
+
+        <div class="settings-card" style="max-width:100%; margin-bottom:20px;">
+          <h4>Most Watched Episodes &amp; Articles</h4>
+          <div id="top-episodes-bars"><p style="color:var(--fg-soft);font-size:13px;">Loading…</p></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%; margin-bottom:20px;">
+          <h4>Most Discussed (by Comments)</h4>
+          <div id="top-discussed-bars"><p style="color:var(--fg-soft);font-size:13px;">Loading…</p></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>Most Answered Questions</h4>
+          <div id="top-answered-bars"><p style="color:var(--fg-soft);font-size:13px;">Loading…</p></div>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-pageimages">
+        <div class="settings-card">
+          <h4>Site Images</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:16px;">Paste an image URL for any of these and every page using it will update automatically.</p>
+          <div id="pageimages-fields"></div>
+          <button class="btn btn-sm" onclick="savePageImages()">Save Images</button>
+          <div id="pageimages-saved" style="font-size:12.5px;color:#2E7D4F;font-weight:700;margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-homepage">
+        <div class="settings-card">
+          <h4>Homepage Hero Text</h4>
+          <div style="margin-bottom:14px;"><label>Badge Text</label><input id="hp-f-badge" placeholder="✦ Welcome!"></div>
+          <div style="margin-bottom:14px;"><label>Heading Highlight Word</label><input id="hp-f-highlight" placeholder="NEW"></div>
+          <div style="margin-bottom:14px;"><label>Heading Rest</label><input id="hp-f-suffix" placeholder="Jewish Kids Hub!"></div>
+          <div style="margin-bottom:14px;"><label>English Tagline</label><input id="hp-f-taglineen" placeholder='"From the mouths of..."'></div>
+          <div style="margin-bottom:14px;"><label>Hebrew Tagline</label><input id="hp-f-taglineheb" placeholder="מפי עוללים..." dir="rtl"></div>
+          <div style="margin-bottom:14px;"><label>Citation</label><input id="hp-f-cite" placeholder="(Tehilim 8:3)"></div>
+          <div style="margin-bottom:14px;"><label>Description</label><textarea id="hp-f-desc" style="min-height:80px;"></textarea></div>
+          <button class="btn btn-sm" onclick="saveHomepage()">Save Homepage</button>
+          <div id="homepage-saved" style="font-size:12.5px;color:#2E7D4F;font-weight:700;margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-kkavideos">
+        <div class="toolbar"><div></div><button class="btn btn-sm" onclick="openForm('videos-kka')">+ Add Episode</button></div>
+        <table><thead><tr><th>Thumb</th><th>Ep</th><th>Title</th><th>YouTube ID</th><th>Access</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-videos-kka"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody></table>
+      </div>
+      <div class="section-panel" id="panel-nachvideos">
+        <div class="toolbar"><div></div><button class="btn btn-sm" onclick="openForm('videos-nach')">+ Add Episode</button></div>
+        <table><thead><tr><th>Thumb</th><th>Title</th><th>YouTube ID</th><th>Access</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-videos-nach"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody></table>
+      </div>
+      <div class="section-panel" id="panel-audio">
+        <div class="toolbar"><div></div><button class="btn btn-sm" onclick="openForm('audio')">+ Add Episode</button></div>
+        <table><thead><tr><th>Ep</th><th>Title</th><th>Synopsis</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-audio"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+      </div>
+      <div class="section-panel" id="panel-magazine">
+        <div class="toolbar"><div></div><button class="btn btn-sm" onclick="openForm('magazines')">+ Add Issue</button></div>
+        <table><thead><tr><th>Cover</th><th>#</th><th>Title</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-magazines"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+      </div>
+      <div class="section-panel" id="panel-halachos">
+        <div class="toolbar"><div></div><button class="btn btn-sm" onclick="openForm('halachos')">+ Add Article</button></div>
+        <table><thead><tr><th>Image</th><th>Title</th><th>Summary</th><th>Access</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-halachos"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-panel" id="panel-notifications">
+        <div class="settings-card">
+          <h4>Site Announcement Banner</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:16px;">Shows as a dismissible bar at the top of every page while active. This is the closest thing to a "push notification" a static site can do without a backend — real mobile push would need Firebase Cloud Messaging and a service worker.</p>
+          <div style="margin-bottom:14px;"><label>Banner Text</label><input id="ann-text" placeholder="New KKA episode is live! 🎉"></div>
+          <div class="toggle-row"><input type="checkbox" id="ann-active" style="width:auto;"> <label style="margin:0;">Banner is active</label></div>
+          <button class="btn btn-sm" onclick="saveAnnouncement()">Save Banner</button>
+          <div id="ann-saved" style="font-size:12.5px;color:#2E7D4F;font-weight:700;margin-top:10px;"></div>
+        </div>
+        <div class="toolbar" style="margin-top:28px;"><h4 style="font-size:15px;">Mailing List Signups</h4>
+          <div class="toolbar-actions"><button class="icon-btn" onclick="exportTableCsv('notifications')">⬇ Export CSV</button></div>
+        </div>
+        <table><thead><tr><th>Email</th><th>Joined</th></tr></thead>
+        <tbody id="table-notifications"><tr class="empty-row"><td colspan="2">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-panel" id="panel-messages">
+        <div class="toolbar"><div></div><div class="toolbar-actions"><button class="icon-btn" onclick="exportTableCsv('messages')">⬇ Export CSV</button></div></div>
+        <table><thead><tr><th>From</th><th>Email</th><th>Message</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-messages"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+      </div>
+      <div class="section-panel" id="panel-magsignups">
+        <div class="toolbar"><div></div><div class="toolbar-actions"><button class="icon-btn" onclick="exportTableCsv('magSignups')">⬇ Export CSV</button></div></div>
+        <table><thead><tr><th>Name</th><th>Email</th><th>Address</th><th>Suburb</th><th></th></tr></thead>
+        <tbody id="table-magsignups"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-panel" id="panel-comments">
+        <div class="comment-filter">
+          <button class="active" data-filter="all" onclick="setCommentFilter('all')">All</button>
+          <button data-filter="pending" onclick="setCommentFilter('pending')">Pending</button>
+          <button data-filter="approved" onclick="setCommentFilter('approved')">Approved</button>
+        </div>
+        <table><thead><tr><th>On</th><th>Name</th><th>Comment</th><th>Status</th><th></th></tr></thead>
+        <tbody id="table-comments"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-panel" id="panel-answers">
+        <div class="toolbar"><div></div><div class="toolbar-actions"><button class="icon-btn" onclick="exportAnswersCsv()">⬇ Export CSV</button></div></div>
+        <table><thead><tr><th>Episode</th><th>Child</th><th>Answer</th><th>Correct?</th><th>Date</th></tr></thead>
+        <tbody id="table-answers"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-panel" id="panel-sendemail">
+        <div class="settings-card">
+          <h4>Compose &amp; Send</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:16px;">This opens your email app with the recipient list pre-filled in BCC. It uses your own outbox, so there's no bulk-email backend involved — for very large lists, most email clients cap how many BCC addresses they'll accept.</p>
+          <div style="margin-bottom:14px;">
+            <label>Recipients</label>
+            <select id="email-recipients">
+              <option value="magSignups">Magazine Delivery Signups</option>
+              <option value="notifications">Mailing List Subscribers</option>
+              <option value="messages">Everyone who's Contacted Us</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px;"><label>Subject</label><input id="email-subject" placeholder="This month's JKH update"></div>
+          <div style="margin-bottom:14px;"><label>Body</label><textarea id="email-body" style="min-height:120px;" placeholder="Hi kinderlach and parents..."></textarea></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-sm" onclick="openMailClient()">✉️ Open in Mail App</button>
+            <button class="icon-btn" onclick="copyRecipientList()">📋 Copy Email List</button>
+          </div>
+          <div id="email-count" style="font-size:12.5px;color:var(--fg-soft);margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-adminsettings">
+        <div class="settings-card" style="max-width:100%;">
+          <h4>🔑 Upload code <span id="us-status" class="pill2" style="margin-left:6px;">🔒 Uploads are locked</span></h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">Uploading pictures and videos needs a secret upload code. Save it on just this device, or share it with the whole team once so nobody else has to enter it. It's never written into the page itself. Without a code, any upload will say you don't have permission.</p>
+          <div style="margin-bottom:14px;"><label>Upload code</label><input type="password" id="us-code" placeholder="Paste the code here" autocomplete="off"></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-sm" onclick="upSaveCode()">Save on this device</button>
+            <button class="btn btn-sm" onclick="upSaveTeamCode()">👥 Share with the whole team</button>
+            <button class="icon-btn" onclick="upCheckCode()">✔ Check it works</button>
+          </div>
+          <div class="toolbar-actions" style="margin-top:8px;">
+            <button class="icon-btn danger" onclick="upRemoveCode()">Remove from this device</button>
+            <button class="icon-btn danger" onclick="upRemoveTeamCode()">Remove team code</button>
+          </div>
+          <div id="us-team-status" style="font-size:12.5px;color:var(--fg-soft);margin-top:10px;"></div>
+          <div id="us-code-msg" style="font-size:12.5px;font-weight:700;margin-top:10px;"></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>📧 Email check <span id="ev-status" class="pill2" style="margin-left:6px;">Off</span></h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">When this is on, after signing in each admin has to type a 6-digit code emailed from the Jewish Kids Hub email, so only the real person gets in. The code lasts 10 minutes and "verified" lasts 12 hours on that browser.</p>
+          <div style="margin-bottom:14px;"><label>Email service address</label><input id="ev-url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
+          <div style="margin-bottom:8px;"><label><input type="checkbox" id="ev-on" style="width:auto;margin-right:6px;">Require an email code to open the admin</label></div>
+          <div style="margin-bottom:14px;"><label><input type="checkbox" id="ev-signup" style="width:auto;margin-right:6px;">Also ask new members for an email code when they create an account (proves their email is real)</label></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-sm" onclick="evSave()">💾 Save</button>
+            <button class="icon-btn" onclick="evTest()">📧 Send me a test code</button>
+          </div>
+          <div id="ev-msg" style="font-size:12.5px;font-weight:700;margin-top:10px;"></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>🎬 Video storage <span id="vs-status" class="pill2" style="margin-left:6px;">Off</span></h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">Send uploaded videos to your own video address (for example <code>videos.jewishkidshub.com</code>) instead of the normal file storage. Pictures and other files keep using the upload code above. Leave blank to keep videos in the normal storage.</p>
+          <div class="up-grid" style="margin-bottom:14px;">
+            <div class="up-wide"><label>Upload address</label><input id="vs-url" placeholder="https://jkh-video-upload.yourname.workers.dev" autocomplete="off"></div>
+            <div class="up-wide"><label>Public video address</label><input id="vs-base" placeholder="https://videos.jewishkidshub.com/" autocomplete="off"></div>
+            <div class="up-wide"><label>Video upload key</label><input type="password" id="vs-key" placeholder="Leave blank to keep the saved key" autocomplete="off"></div>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-sm" onclick="vsSave()">💾 Save &amp; share with the team</button>
+            <button class="icon-btn" onclick="vsCheck()">✔ Check it works</button>
+            <button class="icon-btn danger" onclick="vsOff()">Turn off</button>
+          </div>
+          <div id="vs-msg" style="font-size:12.5px;font-weight:700;margin-top:10px;"></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>📁 Default upload rules</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">These apply everywhere unless you set something special for a specific spot below.</p>
+          <div class="up-grid" style="margin-bottom:14px;">
+            <div><label>Pictures go in folder</label><input id="us-img" placeholder="images"></div>
+            <div><label>Videos go in folder</label><input id="us-vid" placeholder="videos"></div>
+            <div><label>Other files go in folder</label><input id="us-file" placeholder="files"></div>
+            <div><label>Naming</label><select id="us-naming"><option value="ask">Ask me each time</option><option value="auto">Name it automatically</option></select></div>
+            <div class="up-wide"><label>Name pattern</label><input id="us-pattern" placeholder="{name}"></div>
+          </div>
+          <p class="form-note" style="margin:-6px 0 14px;">Pieces you can use in a pattern: <code>{name}</code> the file's own name · <code>{title}</code> and <code>{episode}</code> from the form you're filling in · <code>{date}</code> <code>{time}</code> · <code>{rand}</code> random letters · <code>{kind}</code> where it came from. Example: <code>kka-ep{episode}-{title}</code>. Example result: <b id="us-example"></b></p>
+          <div class="up-grid" style="margin-bottom:14px;">
+            <div><label><input type="checkbox" id="us-shrink" style="width:auto;margin-right:6px;">Shrink big photos automatically</label></div>
+            <div><label>Biggest photo size (pixels)</label><input type="number" id="us-shrinkmax" placeholder="1800"></div>
+            <div><label>Biggest video allowed (MB)</label><input type="number" id="us-maxvid" placeholder="90"></div>
+          </div>
+          <button class="btn btn-sm" onclick="upSaveRules()">Save upload rules</button>
+          <div id="us-rules-msg2" style="font-size:12.5px;font-weight:700;margin-top:10px;"></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>🎯 Rules for each upload spot</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">Pick a folder, naming style and pattern for each place you can upload from — for example a different folder for KKA thumbnails and Nach Heroes videos. Leave anything blank to use the default.</p>
+          <div id="us-kinds"></div>
+          <button class="btn btn-sm" onclick="upSaveRules()">Save upload rules</button>
+          <div id="us-rules-msg" style="font-size:12.5px;font-weight:700;margin-top:10px;"></div>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>🎉 Just for fun</h4>
+          <div style="margin-bottom:14px;"><label>Dashboard colour (just on this device)</label><div id="us-swatches" style="display:flex;gap:10px;flex-wrap:wrap;"></div></div>
+          <div style="margin-bottom:14px;"><label><input type="checkbox" id="us-confetti" style="width:auto;margin-right:6px;">Confetti when an upload finishes</label></div>
+          <button class="icon-btn" onclick="upPreviewConfetti()">🎉 Try the confetti</button>
+        </div>
+
+        <div class="settings-card" style="max-width:100%;">
+          <h4>💾 Back up your rules</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">Saves your folders, patterns and naming choices to a file (the upload code is never included).</p>
+          <div class="toolbar-actions">
+            <button class="icon-btn" onclick="upExport()">⬇ Download rules</button>
+            <button class="icon-btn" onclick="document.getElementById('us-import').click()">⬆ Load rules from a file</button>
+            <input type="file" id="us-import" accept="application/json,.json" style="display:none" onchange="upImport(this)">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-fileupload">
+        <div class="settings-card" id="uf-lock" style="max-width:100%;display:none;">
+          <h4>🔒 Uploads are locked</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">An admin needs to add the upload code in Admin Settings before files can be uploaded.</p>
+          <button class="btn btn-sm" onclick="document.querySelector('.admin-nav-item[data-section=adminsettings]').click()">Open Admin Settings</button>
+        </div>
+        <div class="settings-card" id="uf-card" style="max-width:100%;">
+          <h4>Upload files</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">Files are named and filed using the "Upload Files tab" rules in Admin Settings. You can still rename each one before it goes.</p>
+          <div style="margin-bottom:14px;"><label>Folder (optional — overrides your rules)</label><input id="uf-folder" placeholder="e.g. images/magazine"></div>
+          <label class="ghu-drop" id="uf-drop">
+            <div class="big">📁</div><b>Click to choose files</b><small>or drag them here · max ~90MB each</small>
+            <input type="file" id="uf-files" multiple>
+          </label>
+          <div id="uf-list"></div>
+          <button class="btn btn-sm" id="uf-go" disabled onclick="ufUploadAll()">Upload</button>
+        </div>
+        <div class="settings-card" style="max-width:100%;">
+          <h4>Recent uploads</h4>
+          <div id="uf-recent"></div>
+          <button class="icon-btn" style="margin-top:6px;" onclick="ufClearRecent()">Clear list</button>
+        </div>
+      </div>
+
+      <div class="section-panel" id="panel-shortlinks">
+        <div class="settings-card" style="max-width:100%;">
+          <h4>Create a short link</h4>
+          <p class="form-note" style="margin-top:-8px;margin-bottom:14px;">Make a clean link like <strong id="sl-example"></strong> that redirects anywhere on the web. Change where it goes any time without changing the link.</p>
+          <div style="margin-bottom:14px;"><label>Link address (which website the short link lives on)</label>
+            <select id="sl-domain"></select>
+            <div class="form-note" style="margin-top:6px;">Want it on another website? Pick “Add another website…”. That website just needs the redirect page — see the instructions that came with this update.</div></div>
+          <div style="margin-bottom:14px;"><label>Short name (letters, numbers, dashes — leave blank for random)</label><input id="sl-slug" placeholder="shawarma"></div>
+          <div style="margin-bottom:14px;"><label>Send people to</label><input id="sl-url" placeholder="https://..."></div>
+          <div style="margin-bottom:14px;"><label>Note shown while redirecting (optional)</label><input id="sl-note" placeholder="Opening the Shawarma coupon page…"></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-sm" onclick="slSave()">Save link</button>
+            <button class="icon-btn" onclick="slClear()">Clear</button>
+          </div>
+          <div id="sl-msg" style="font-size:12.5px;font-weight:700;margin-top:10px;"></div>
+        </div>
+        <table><thead><tr><th>Short link</th><th>Goes to</th><th>Clicks</th><th></th></tr></thead>
+        <tbody id="table-shortlinks"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-panel" id="panel-users">
+        <p style="font-size:13.5px;color:var(--fg-soft);margin-bottom:14px;">Registered site members (from Sign Up / Google Sign-In). Grant Admin to trust someone with this dashboard.</p>
+        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead>
+        <tbody id="table-users"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+        <div class="stub-card" style="margin-top:20px;">Two bootstrap admins are always allowed in, regardless of this list: <strong>jewishkidshub@gmail.com</strong> and <strong>admin@jewishkidshub.com</strong> — edit <code>ALLOWED_ADMINS</code> in this file to change them. Everyone else's dashboard access is controlled by the Admin toggle above, which is real and takes effect immediately.<br><br>Note: this restriction lives in this page's JavaScript. Anyone who edited the file could bypass it, so for real security also add matching Firebase Realtime Database rules that check <code>auth.token.email</code> / a server-side admin flag before allowing writes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-card">
+    <h3 id="modal-title">Add</h3>
+    <div id="modal-fields"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeForm()">Cancel</button>
+      <button class="btn" onclick="saveForm()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="fullscreen-editor-overlay">
+  <div class="fse-topbar">
+    <h3>Editing: Full Article</h3>
+    <div class="fse-topbar-actions">
+      <button class="btn-ghost" style="padding:9px 18px;" onclick="closeFullscreenEditor(false)">Cancel</button>
+      <button class="btn" style="padding:9px 20px;" onclick="closeFullscreenEditor(true)">Done</button>
+    </div>
+  </div>
+  <div class="fse-body">
+    <div id="quill-editor-fullscreen"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="/firebase-init.js"></script>
+<script src="/cloudinary-config.js"></script>
+<script src="/site.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script>
+const ALLOWED_ADMINS = ["jewishkidshub@gmail.com", "admin@jewishkidshub.com"];
+let currentUserUid = null;
+
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Enter your email and password.'; return; }
+  auth.signInWithEmailAndPassword(email, password).catch(err=> errEl.textContent = 'Sign in failed: ' + err.message);
+}
+function doGoogleLogin(){
+  auth.signInWithPopup(googleProvider).catch(err=> document.getElementById('login-error').textContent = err.message);
+}
+function doLogout(){ try{sessionStorage.removeItem('jkh_ev_token');}catch(e){} auth.signOut(); }
+/* ---- optional "verify it's you" email code (set up in Admin Settings → Email check) ---- */
+const EV_KEY='jkh_ev_token';
+function evPost(url,body){
+  return fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(r=>r.json());
+}
+let evCtx=null;
+async function emailGate(user){
+  let cfg=null;
+  try{cfg=(await db.ref('siteSettings/emailVerify').once('value')).val();}catch(e){}
+  if(!cfg||!cfg.on||!cfg.url)return;                         // not switched on → nothing changes
+  let tok='';try{tok=sessionStorage.getItem(EV_KEY)||'';}catch(e){}
+  if(tok){try{const r=await evPost(cfg.url,{action:'check',email:user.email,token:tok});if(r.ok)return;}catch(e){}}
+  await new Promise(resolve=>{
+    evCtx={cfg:cfg,email:user.email,done:resolve};
+    document.getElementById('vf-sub').textContent="We'll email a 6-digit code to "+user.email+".";
+    document.getElementById('verify-screen').style.display='flex';
+  });
+}
+window.vfSend=async function(){
+  const m=document.getElementById('vf-msg');m.style.color='';m.textContent='Sending…';
+  try{
+    const r=await evPost(evCtx.cfg.url,{action:'send',email:evCtx.email});
+    if(r.ok){m.style.color='#2E7D4F';m.textContent='✅ Sent! Check your email (and spam). The code works for 10 minutes.';
+      document.getElementById('vf-codebox').style.display='';document.getElementById('vf-send').textContent='📧 Send a new code';document.getElementById('vf-code').focus();}
+    else m.textContent=r.message||"Couldn't send a code.";
+  }catch(e){m.textContent="Couldn't reach the verification service. Check your connection and try again.";}
+};
+window.vfCheck=async function(){
+  const m=document.getElementById('vf-msg'),code=document.getElementById('vf-code').value.trim();
+  if(!/^\d{6}$/.test(code)){m.style.color='';m.textContent='Enter the 6-digit code.';return;}
+  m.style.color='';m.textContent='Checking…';
+  try{
+    const r=await evPost(evCtx.cfg.url,{action:'verify',email:evCtx.email,code:code});
+    if(r.ok){try{sessionStorage.setItem(EV_KEY,r.token);}catch(e){}evCtx.done();}
+    else m.textContent=r.message||'That code was not accepted.';
+  }catch(e){m.textContent="Couldn't reach the verification service. Try again.";}
+};
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&evCtx&&document.getElementById('verify-screen').style.display==='flex'){if(document.getElementById('vf-codebox').style.display!=='none')vfCheck();}});
+
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('admin-app').style.display = 'none';
+    return;
+  }
+  currentUserUid = user.uid;
+  db.ref('users/'+user.uid).once('value').then(snap=>{
+    const profile = snap.val() || {};
+    const isAdmin = ALLOWED_ADMINS.includes(user.email) || profile.role === 'admin';
+    if(isAdmin){
+      document.getElementById('login-screen').style.display = 'none';
+      emailGate(user).then(()=>{
+        document.getElementById('verify-screen').style.display = 'none';
+        document.getElementById('admin-app').style.display = 'block';
+        document.getElementById('who-label').textContent = user.email;
+        startListeners();
+      });
+    } else {
+      document.getElementById('login-error').textContent = 'This account is not authorized for admin access.';
+      auth.signOut();
+    }
+  });
+});
+
+document.querySelectorAll('.admin-nav-item[data-section]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.admin-nav-item[data-section]').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.section).classList.add('active');
+    document.getElementById('section-title').textContent = btn.textContent.trim();
+  });
+});
+
+const schemas = {
+  'videos-kka': { table:'videos', label:'KKA Episode', extra:{series:'kka'},
+    fields:[
+      {key:'episode', label:'Episode Number', type:'number'},
+      {key:'title', label:'Title', type:'text'},
+      {key:'synopsis', label:'Synopsis', type:'textarea'},
+      {key:'customs', label:'Customs & Lessons (comma separated)', type:'list'},
+      {key:'cast', label:'Cast (comma separated)', type:'list'},
+      {key:'keywords', label:'Keywords / Topics (comma separated — helps people find it in search)', type:'list'},
+      {key:'videoSource', label:'Video Source', type:'select', options:[['youtube','YouTube'],['github','GitHub']], default:ex=> (ex && ex.videoUrl && !ex.videoSource) ? 'github' : 'youtube'},
+      {key:'youtubeId', label:'YouTube Video — paste the link or the video ID', type:'text', showIf:{videoSource:'youtube'}},
+      {key:'videoUrl', label:'GitHub Video — upload a video file, or paste its direct link', type:'text', video:true, showIf:{videoSource:'github'}},
+      {key:'thumbnailUrl', label:'Thumbnail Image URL', type:'text', image:true},
+      {key:'slug', label:'Custom Link (optional — e.g. "ep1" makes the URL end in ?id=ep1 instead of a random ID)', type:'text'},
+      {key:'releaseAt', label:'Release Video At (optional — video shows as "not available yet" for everyone until this moment, then plays automatically)', type:'datetime-local'},
+      {key:'membersOnly', label:'Members Only (must be signed in to watch)', type:'checkbox'},
+      {key:'membersOnlyUntil', label:'Opens to everyone on (optional — leave blank to keep members-only until you uncheck the box above)', type:'datetime-local'},
+      {key:'question', label:'Question (optional — shown just under the video)', type:'text'},
+      {key:'questionOptions', label:'Answer Options (comma separated, in order)', type:'list'},
+      {key:'correctAnswer', label:'Correct Answer Number (1, 2, 3… matching the option order above)', type:'number'},
+      {key:'published', label:'Published', type:'checkbox'},
+    ]},
+  'videos-nach': { table:'videos', label:'Nach Heroes Episode', extra:{series:'nach'},
+    fields:[
+      {key:'title', label:'Title', type:'text'},
+      {key:'synopsis', label:'Synopsis', type:'textarea'},
+      {key:'keywords', label:'Keywords / Topics (comma separated — helps people find it in search)', type:'list'},
+      {key:'videoUrl', label:'Uploaded Video (takes priority over YouTube ID below if both are set)', type:'text', video:true},
+      {key:'youtubeId', label:'YouTube Video ID (used only if no uploaded video above)', type:'text'},
+      {key:'thumbnailUrl', label:'Thumbnail Image URL', type:'text', image:true},
+      {key:'slug', label:'Custom Link (optional — e.g. "dovid-golyas" makes the URL end in ?id=dovid-golyas instead of a random ID)', type:'text'},
+      {key:'releaseAt', label:'Release Video At (optional — video shows as "not available yet" for everyone until this moment, then plays automatically)', type:'datetime-local'},
+      {key:'membersOnly', label:'Members Only (must be signed in to watch)', type:'checkbox'},
+      {key:'membersOnlyUntil', label:'Opens to everyone on (optional — leave blank to keep members-only until you uncheck the box above)', type:'datetime-local'},
+      {key:'published', label:'Published', type:'checkbox'},
+    ]},
+  audio: { table:'audio', label:'Audio Episode',
+    fields:[
+      {key:'episode', label:'Episode Number', type:'number'},
+      {key:'title', label:'Title', type:'text'},
+      {key:'synopsis', label:'Description', type:'textarea'},
+      {key:'keywords', label:'Keywords / Topics (comma separated — helps people find it in search)', type:'list'},
+      {key:'thumbnailUrl', label:'Cover Image URL', type:'text', image:true},
+      {key:'links.spotify', label:'Spotify Link', type:'text'},
+      {key:'links.youtube', label:'YouTube Music Link', type:'text'},
+      {key:'links.drive', label:'Google Drive Link', type:'text'},
+      {key:'published', label:'Published', type:'checkbox'},
+    ]},
+  magazines: { table:'magazines', label:'Magazine Issue',
+    fields:[
+      {key:'issue', label:'Issue Number', type:'number'},
+      {key:'title', label:'Title', type:'text'},
+      {key:'blurb', label:'Blurb', type:'textarea'},
+      {key:'keywords', label:'Keywords / Topics (comma separated — helps people find it in search)', type:'list'},
+      {key:'coverUrl', label:'Cover Image URL', type:'text', image:true},
+      {key:'pdfUrl', label:'PDF Link', type:'text'},
+      {key:'published', label:'Published', type:'checkbox'},
+    ]},
+  halachos: { table:'halachos', label:'Halacha Article',
+    fields:[
+      {key:'title', label:'Title', type:'text'},
+      {key:'summary', label:'Short Summary', type:'textarea'},
+      {key:'keywords', label:'Keywords / Topics (comma separated — helps people find it in search)', type:'list'},
+      {key:'body', label:'Full Article (optional)', type:'richtext'},
+      {key:'imageUrl', label:'Article Image', type:'text', image:true},
+      {key:'slug', label:'Custom Link (optional — e.g. "shabbos-candles" makes the URL end in ?id=shabbos-candles instead of a random ID)', type:'text'},
+      {key:'membersOnly', label:'Members Only (must be signed in to read)', type:'checkbox'},
+      {key:'membersOnlyUntil', label:'Opens to everyone on (optional — leave blank to keep members-only until you uncheck the box above)', type:'datetime-local'},
+      {key:'published', label:'Published', type:'checkbox'},
+    ]},
+};
+
+let currentSchemaKey = null, editingId = null;
+let richtextDraft = '';
+let richtextDraftKey = null;
+let fullscreenQuill = null;
+let cachedUsers = [], cachedComments = [], cachedAnswers = [];
+let videosById = {};
+let halachosById = {};
+let cachedEpisodeViews = {};
+let commentFilter = 'all';
+
+function startListeners(){
+  db.ref('videos').on('value', snap=>{
+    const all = snapToArray(snap);
+    videosById = {};
+    all.forEach(v=> videosById[v.id] = v);
+    const kka = all.filter(v=>v.series==='kka').sort((a,b)=>(b.episode||0)-(a.episode||0));
+    const nach = all.filter(v=>v.series==='nach');
+    animateCount(document.getElementById('stat-kka'), kka.length);
+    animateCount(document.getElementById('stat-nach'), nach.length);
+    renderVideoTable('table-videos-kka', kka, true);
+    renderVideoTable('table-videos-nach', nach, false);
+  });
+  db.ref('audio').on('value', snap=>{
+    const list = snapToArray(snap);
+    animateCount(document.getElementById('stat-audio'), list.length);
+    const tbody = document.getElementById('table-audio');
+    tbody.innerHTML = list.length ? list.map(a=>`<tr><td>#${a.episode??'—'}</td><td>${esc(a.title)}</td><td>${esc((a.synopsis||'').slice(0,40))}</td><td>${pill(a.published)}</td>
+      <td class="row-actions"><button class="icon-btn" onclick="editItem('audio','${a.id}')">✎</button><button class="icon-btn danger" onclick="deleteItem('audio','${a.id}')">🗑</button></td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="5">Nothing here yet.</td></tr>`;
+  });
+  db.ref('magazines').on('value', snap=>{
+    const list = snapToArray(snap).sort((a,b)=>(b.issue||0)-(a.issue||0));
+    animateCount(document.getElementById('stat-magazines'), list.length);
+    const tbody = document.getElementById('table-magazines');
+    tbody.innerHTML = list.length ? list.map(m=>`<tr><td>${m.coverUrl?`<img class="thumb-preview" src="${m.coverUrl}">`:'—'}</td><td>#${m.issue??'—'}</td><td>${esc(m.title)}</td><td>${pill(m.published)}</td>
+      <td class="row-actions"><button class="icon-btn" onclick="editItem('magazines','${m.id}')">✎</button><button class="icon-btn danger" onclick="deleteItem('magazines','${m.id}')">🗑</button></td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="5">Nothing here yet.</td></tr>`;
+  });
+  db.ref('halachos').on('value', snap=>{
+    const list = snapToArray(snap);
+    halachosById = {};
+    list.forEach(h=> halachosById[h.id] = h);
+    animateCount(document.getElementById('stat-halachos'), list.length);
+    const tbody = document.getElementById('table-halachos');
+    tbody.innerHTML = list.length ? list.map(h=>`<tr><td>${h.imageUrl?`<img class="thumb-preview" src="${h.imageUrl}">`:'—'}</td><td>${esc(h.title)}</td><td>${esc((h.summary||'').slice(0,50))}</td><td>${pill(h.published)}</td>
+      <td class="row-actions"><button class="icon-btn" onclick="editItem('halachos','${h.id}')">✎</button><button class="icon-btn danger" onclick="deleteItem('halachos','${h.id}')">🗑</button></td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="5">Nothing here yet.</td></tr>`;
+  });
+  db.ref('messages').on('value', snap=>{
+    const list = snapToArray(snap);
+    animateCount(document.getElementById('stat-messages'), list.length);
+    const tbody = document.getElementById('table-messages');
+    tbody.innerHTML = list.length ? list.map(m=>`<tr><td>${esc(m.name)}</td><td>${esc(m.email)}</td><td style="white-space:pre-wrap; max-width:340px;">${esc(m.message||'')}</td><td>${m.read?'<span class="pill2 on">Read</span>':'<span class="pill2">Unread</span>'}</td>
+      <td class="row-actions"><button class="icon-btn" onclick="toggleRead('${m.id}', ${!!m.read})">${m.read?'Mark unread':'Mark read'}</button><button class="icon-btn danger" onclick="deleteItem('messages','${m.id}')">🗑</button></td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="5">Nothing here yet.</td></tr>`;
+  });
+  db.ref('magSignups').on('value', snap=>{
+    const list = snapToArray(snap);
+    animateCount(document.getElementById('stat-magsignups'), list.length);
+    const tbody = document.getElementById('table-magsignups');
+    tbody.innerHTML = list.length ? list.map(s=>`<tr><td>${esc((s.firstName||'')+' '+(s.lastName||''))}</td><td>${esc(s.email)}</td><td>${esc(s.street)}</td><td>${esc(s.suburb)}</td>
+      <td class="row-actions"><button class="icon-btn danger" onclick="deleteItem('magSignups','${s.id}')">🗑</button></td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="5">Nothing here yet.</td></tr>`;
+  });
+  db.ref('notifications').on('value', snap=>{
+    const list = snapToArray(snap).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    const tbody = document.getElementById('table-notifications');
+    tbody.innerHTML = list.length ? list.map(n=>`<tr><td>${esc(n.email)}</td><td>${n.timestamp?new Date(n.timestamp).toLocaleDateString():'—'}</td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="2">No signups yet.</td></tr>`;
+  });
+  db.ref('users').on('value', snap=>{
+    cachedUsers = snapToArray(snap);
+    animateCount(document.getElementById('stat-users'), cachedUsers.length);
+    renderUsersTable();
+    const totalChildren = cachedUsers.reduce((sum,u)=> sum + Object.keys(u.children||{}).length, 0);
+    animateCount(document.getElementById('an-stat-children'), totalChildren);
+  });
+  db.ref('comments').on('value', snap=>{
+    cachedComments = snapToArray(snap).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    animateCount(document.getElementById('stat-comments'), cachedComments.length);
+    animateCount(document.getElementById('an-stat-comments'), cachedComments.length);
+    renderCommentsTable();
+    renderTopDiscussedTable();
+  });
+  db.ref('answers').on('value', snap=>{
+    const val = snap.val() || {};
+    cachedAnswers = [];
+    Object.entries(val).forEach(([videoId, children])=>{
+      Object.entries(children).forEach(([childId, a])=>{
+        cachedAnswers.push({videoId, childId, ...a});
+      });
+    });
+    cachedAnswers.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    animateCount(document.getElementById('stat-answers'), cachedAnswers.length);
+    animateCount(document.getElementById('an-stat-answers'), cachedAnswers.length);
+    const correctPct = cachedAnswers.length ? Math.round(100 * cachedAnswers.filter(a=>a.correct).length / cachedAnswers.length) : null;
+    document.getElementById('an-stat-correct-rate').textContent = correctPct === null ? '—' : correctPct + '%';
+    renderAnswersTable();
+    renderTopAnsweredTable();
+  });
+  db.ref('analytics').on('value', snap=>{
+    const a = snap.val() || {};
+    animateCount(document.getElementById('stat-totalviews'), a.totalViews || 0);
+    animateCount(document.getElementById('an-stat-views'), a.totalViews || 0);
+    renderAnalytics(a.pageViews || {});
+    cachedEpisodeViews = a.episodeViews || {};
+    const totalEpisodeViews = Object.values(cachedEpisodeViews).reduce((s,n)=>s+n, 0);
+    animateCount(document.getElementById('an-stat-episode-views'), totalEpisodeViews);
+    renderTopEpisodesTable();
+  });
+  db.ref('siteImages').once('value').then(snap=> renderPageImagesForm(snap.val() || {}));
+  db.ref('siteSettings/homepage').once('value').then(snap=> renderHomepageForm(snap.val() || {}));
+  db.ref('siteSettings/announcement').once('value').then(snap=> renderAnnouncementForm(snap.val() || {}));
+}
+
+function renderAnalytics(pageViews){
+  const entries = Object.entries(pageViews).sort((a,b)=>b[1]-a[1]);
+  const max = entries.length ? Math.max(...entries.map(e=>e[1])) : 1;
+  const el = document.getElementById('analytics-bars');
+  if(!entries.length){ el.innerHTML = '<p style="color:var(--fg-soft);font-size:13px;">No page views logged yet.</p>'; return; }
+  el.innerHTML = entries.map(([page,count])=>`
+    <div class="analytics-bar-row">
+      <div class="analytics-bar-label">${esc(page)}</div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.max(4,(count/max*100))}%;"></div></div>
+      <div class="analytics-bar-count">${count}</div>
+    </div>`).join('');
+}
+
+function labelForContentId(id){
+  if(videosById[id]){
+    const v = videosById[id];
+    return (v.series==='kka' ? `EP ${v.episode}: ` : '') + (v.title || id);
+  }
+  if(halachosById[id]) return halachosById[id].title || id;
+  return id;
+}
+
+function renderBarList(elId, entries, emptyMsg){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(!entries.length){ el.innerHTML = `<p style="color:var(--fg-soft);font-size:13px;">${emptyMsg}</p>`; return; }
+  const max = Math.max(...entries.map(e=>e[1]));
+  el.innerHTML = entries.map(([label,count])=>`
+    <div class="analytics-bar-row">
+      <div class="analytics-bar-label" style="width:200px; text-transform:none;">${esc(label)}</div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.max(4,(count/max*100))}%;"></div></div>
+      <div class="analytics-bar-count">${count}</div>
+    </div>`).join('');
+}
+
+function renderTopEpisodesTable(){
+  const entries = Object.entries(cachedEpisodeViews)
+    .map(([id,count])=>[labelForContentId(id), count])
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,8);
+  renderBarList('top-episodes-bars', entries, 'No episode or article views logged yet.');
+}
+
+function renderTopDiscussedTable(){
+  const counts = {};
+  cachedComments.forEach(c=>{ counts[c.onId] = (counts[c.onId]||0) + 1; });
+  const entries = Object.entries(counts)
+    .map(([id,count])=>[labelForContentId(id), count])
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,8);
+  renderBarList('top-discussed-bars', entries, 'No comments yet.');
+}
+
+function renderTopAnsweredTable(){
+  const counts = {};
+  cachedAnswers.forEach(a=>{ counts[a.videoId] = (counts[a.videoId]||0) + 1; });
+  const entries = Object.entries(counts)
+    .map(([id,count])=>[labelForContentId(id), count])
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,8);
+  renderBarList('top-answered-bars', entries, 'No question answers submitted yet.');
+}
+
+const IMAGE_KEYS = [
+  {key:'logo', label:'Site Logo (nav, hero, footer)'},
+  {key:'kkaLogo', label:'Kids Kan Akomplish Logo'},
+  {key:'nachLogo', label:'Nach Heroes Logo'},
+  {key:'halachosLogo', label:'Halachos Logo'},
+  {key:'magazineCover', label:'Magazine Cover'},
+  {key:'moshiachThumb', label:'Moshiach is in our Hands Thumbnail'},
+];
+function renderPageImagesForm(vals){
+  document.getElementById('pageimages-fields').innerHTML = IMAGE_KEYS.map(k=>`
+    <div class="img-field-row">
+      <img class="thumb-preview" id="preview-${k.key}" src="${vals[k.key]||''}" onerror="this.style.opacity=0.2">
+      <div class="field-inner">
+        <label>${k.label}</label>
+        <div class="img-upload-row">
+          <input id="imgfield-${k.key}" value="${esc(vals[k.key]||'')}" placeholder="https://..." oninput="document.getElementById('preview-${k.key}').src=this.value">
+          <input type="file" accept="image/*" id="fileinput-${k.key}" style="display:none" onchange="handleImageUpload(this, 'imgfield-${k.key}', 'preview-${k.key}')">
+          <button type="button" class="upload-btn" onclick="document.getElementById('fileinput-${k.key}').click()">⬆ Upload</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function savePageImages(){
+  const data = {};
+  IMAGE_KEYS.forEach(k=>{ const v = document.getElementById('imgfield-'+k.key).value.trim(); if(v) data[k.key] = v; });
+  db.ref('siteImages').update(data).then(()=>{
+    document.getElementById('pageimages-saved').textContent = 'Saved! Live pages will pick this up on next load.';
+    setTimeout(()=> document.getElementById('pageimages-saved').textContent = '', 3000);
+  });
+}
+
+function renderHomepageForm(h){
+  document.getElementById('hp-f-badge').value = h.badgeText || '✦ Welcome!';
+  document.getElementById('hp-f-highlight').value = h.headingHighlight || 'NEW';
+  document.getElementById('hp-f-suffix').value = h.headingSuffix || 'Jewish Kids Hub!';
+  document.getElementById('hp-f-taglineen').value = h.taglineEn || '"From the mouths of Yiddishe kinderlach, Hashem established strength."';
+  document.getElementById('hp-f-taglineheb').value = h.taglineHeb || 'מפי עוללים ויונקים יסדת עוז';
+  document.getElementById('hp-f-cite').value = h.taglineCite || '(Tehilim 8:3)';
+  document.getElementById('hp-f-desc').value = h.description || "Jewish Kids Hub is where Yiddishe kinderlach discover the special koach Hashem gave them to fill the world with Torah and light.";
+}
+function saveHomepage(){
+  const data = {
+    badgeText: document.getElementById('hp-f-badge').value,
+    headingHighlight: document.getElementById('hp-f-highlight').value,
+    headingSuffix: document.getElementById('hp-f-suffix').value,
+    taglineEn: document.getElementById('hp-f-taglineen').value,
+    taglineHeb: document.getElementById('hp-f-taglineheb').value,
+    taglineCite: document.getElementById('hp-f-cite').value,
+    description: document.getElementById('hp-f-desc').value,
+  };
+  db.ref('siteSettings/homepage').set(data).then(()=>{
+    document.getElementById('homepage-saved').textContent = 'Saved! Reload the homepage to see it.';
+    setTimeout(()=> document.getElementById('homepage-saved').textContent = '', 3000);
+  });
+}
+
+function renderAnnouncementForm(a){
+  document.getElementById('ann-text').value = a.text || '';
+  document.getElementById('ann-active').checked = !!a.active;
+}
+function saveAnnouncement(){
+  const data = { text: document.getElementById('ann-text').value, active: document.getElementById('ann-active').checked };
+  db.ref('siteSettings/announcement').set(data).then(()=>{
+    document.getElementById('ann-saved').textContent = 'Saved! It will appear on all pages.';
+    setTimeout(()=> document.getElementById('ann-saved').textContent = '', 3000);
+  });
+}
+
+function setCommentFilter(f){
+  commentFilter = f;
+  document.querySelectorAll('.comment-filter button').forEach(b=> b.classList.toggle('active', b.dataset.filter===f));
+  renderCommentsTable();
+}
+function renderCommentsTable(){
+  let list = cachedComments;
+  if(commentFilter === 'pending') list = list.filter(c=>!c.approved);
+  if(commentFilter === 'approved') list = list.filter(c=>c.approved);
+  const tbody = document.getElementById('table-comments');
+  tbody.innerHTML = list.length ? list.map(c=>`<tr>
+    <td>${esc(c.onType||'')} ${esc(c.onId||'')}</td>
+    <td>${esc(c.name||'Anonymous')}</td>
+    <td>${esc((c.text||'').slice(0,60))}</td>
+    <td>${c.approved?'<span class="pill2 on">Approved</span>':'<span class="pill2">Pending</span>'}</td>
+    <td class="row-actions">
+      ${c.approved ? `<button class="icon-btn" onclick="toggleCommentApproval('${c.id}', true)">Unapprove</button>` : `<button class="icon-btn good" onclick="toggleCommentApproval('${c.id}', false)">Approve</button>`}
+      <button class="icon-btn danger" onclick="deleteItem('comments','${c.id}')">🗑</button>
+    </td>
+  </tr>`).join('') : `<tr class="empty-row"><td colspan="5">No comments here.</td></tr>`;
+}
+function toggleCommentApproval(id, current){ db.ref('comments/'+id).update({approved: !current}); }
+
+function renderAnswersTable(){
+  const tbody = document.getElementById('table-answers');
+  if(!tbody) return;
+  tbody.innerHTML = cachedAnswers.length ? cachedAnswers.map(a=>{
+    const video = videosById[a.videoId];
+    const episodeLabel = video ? `${video.series==='kka' ? 'EP '+video.episode+': ' : ''}${esc(video.title)}` : esc(a.videoId);
+    return `<tr>
+      <td>${episodeLabel}</td>
+      <td>${esc(a.childName)}</td>
+      <td>${esc(a.answer)}</td>
+      <td>${a.correct ? '<span class="pill2 on">Correct</span>' : '<span class="pill2">Incorrect</span>'}</td>
+      <td>${a.timestamp ? new Date(a.timestamp).toLocaleString() : '—'}</td>
+    </tr>`;
+  }).join('') : `<tr class="empty-row"><td colspan="5">No answers submitted yet.</td></tr>`;
+}
+function exportAnswersCsv(){
+  if(!cachedAnswers.length){ toast('Nothing to export yet.'); return; }
+  const rows = [['Episode','Child','Answer','Correct','Date'], ...cachedAnswers.map(a=>{
+    const video = videosById[a.videoId];
+    return [video ? video.title : a.videoId, a.childName, a.answer, a.correct ? 'Yes':'No', a.timestamp ? new Date(a.timestamp).toISOString() : ''];
+  })];
+  exportCsv('answers.csv', rows);
+}
+
+function renderUsersTable(){
+  const tbody = document.getElementById('table-users');
+  tbody.innerHTML = cachedUsers.length ? cachedUsers.map(u=>{
+    const isBootstrap = ALLOWED_ADMINS.includes(u.email);
+    const isAdmin = u.role === 'admin' || isBootstrap;
+    return `<tr><td>${esc((u.firstName||'')+' '+(u.lastName||''))}</td><td>${esc(u.email)}</td>
+      <td>${isAdmin ? '<span class="pill2 admin">Admin</span>' : '<span class="pill2">Member</span>'}</td>
+      <td>${u.createdAt?new Date(u.createdAt).toLocaleDateString():'—'}</td>
+      <td class="row-actions">${isBootstrap ? '<span style="font-size:11.5px;color:var(--fg-soft);">Bootstrap admin</span>' :
+        (u.role==='admin' ? `<button class="icon-btn danger" onclick="setUserRole('${u.id}','member')">Revoke Admin</button>` : `<button class="icon-btn good" onclick="setUserRole('${u.id}','admin')">Make Admin</button>`)}</td>
+    </tr>`;
+  }).join('') : `<tr class="empty-row"><td colspan="5">No registered users yet.</td></tr>`;
+}
+function setUserRole(uid, role){
+  db.ref('users/'+uid).update({role}).then(renderUsersTable);
+}
+
+function getEmailList(callback){
+  const source = document.getElementById('email-recipients').value;
+  db.ref(source).once('value').then(snap=>{
+    const list = snapToArray(snap);
+    const emails = [...new Set(list.map(x=>x.email).filter(Boolean))];
+    callback(emails);
+  });
+}
+document.getElementById('email-recipients').addEventListener('change', updateEmailCount);
+function updateEmailCount(){
+  getEmailList(emails=>{
+    document.getElementById('email-count').textContent = `${emails.length} recipient${emails.length===1?'':'s'} in this list.`;
+  });
+}
+function openMailClient(){
+  getEmailList(emails=>{
+    const subject = encodeURIComponent(document.getElementById('email-subject').value);
+    const body = encodeURIComponent(document.getElementById('email-body').value);
+    const bcc = encodeURIComponent(emails.join(','));
+    window.location.href = `mailto:?bcc=${bcc}&subject=${subject}&body=${body}`;
+  });
+}
+function copyRecipientList(){
+  getEmailList(emails=>{
+    navigator.clipboard.writeText(emails.join(', ')).then(()=> toast(`Copied ${emails.length} email addresses.`));
+  });
+}
+updateEmailCount();
+
+function exportTableCsv(path){
+  db.ref(path).once('value').then(snap=>{
+    const list = snapToArray(snap);
+    if(!list.length){ toast('Nothing to export yet.'); return; }
+    const cols = Object.keys(list[0]).filter(k=>k!=='id');
+    const rows = [cols, ...list.map(item=> cols.map(c=> item[c]))];
+    exportCsv(path+'.csv', rows);
+  });
+}
+
+function renderVideoTable(tableId, list, showEp){
+  const tbody = document.getElementById(tableId);
+  const key = showEp ? 'videos-kka' : 'videos-nach';
+  tbody.innerHTML = list.length ? list.map(v=>`<tr>
+    <td>${v.thumbnailUrl?`<img class="thumb-preview" src="${v.thumbnailUrl}">`:'—'}</td>
+    ${showEp?`<td>#${v.episode??'—'}</td>`:''}
+    <td>${esc(v.title)}</td><td>${esc(v.youtubeId||'—')}</td>
+    <td>${accessPill(v)}</td>
+    <td>${pill(v.published)}</td>
+    <td class="row-actions"><button class="icon-btn" onclick="editItem('${key}','${v.id}')">✎</button><button class="icon-btn danger" onclick="deleteItem('videos','${v.id}')">🗑</button></td>
+  </tr>`).join('') : `<tr class="empty-row"><td colspan="${showEp?7:6}">Nothing here yet — click "Add" to create the first one.</td></tr>`;
+}
+function accessPill(v){
+  const parts = [];
+  if(v.releaseAt){
+    const releaseTime = new Date(v.releaseAt).getTime();
+    if(!isNaN(releaseTime) && Date.now() < releaseTime){
+      parts.push(`<span class="pill2" style="background:#DCEEF2;color:#2C5F6F;">⏳ ${new Date(v.releaseAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>`);
+    }
+  }
+  if(!v.membersOnly){
+    parts.push('<span class="pill2">Public</span>');
+  } else if(v.membersOnlyUntil){
+    const until = new Date(v.membersOnlyUntil).getTime();
+    parts.push(!isNaN(until) && Date.now() > until
+      ? '<span class="pill2">Public (opened)</span>'
+      : `<span class="pill2 admin">🔒 Until ${new Date(v.membersOnlyUntil).toLocaleDateString()}</span>`);
+  } else {
+    parts.push('<span class="pill2 admin">🔒 Members Only</span>');
+  }
+  return parts.join(' ');
+}
+
+function pill(v){ return v ? '<span class="pill2 on">Published</span>' : '<span class="pill2">Draft</span>'; }
+
+function animateCount(el, target){
+  if(!el) return;
+  target = Number(target) || 0;
+  const start = Number(el.dataset.count || 0);
+  if(start === target){ el.textContent = target; return; }
+  const duration = 500;
+  const startTime = performance.now();
+  function tick(now){
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(start + (target - start) * eased);
+    el.textContent = current;
+    if(progress < 1){ requestAnimationFrame(tick); }
+    else { el.dataset.count = target; }
+  }
+  requestAnimationFrame(tick);
+}
+function esc(str){ return String(str??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function toggleRead(id, current){ db.ref('messages/'+id).update({read: !current}); }
+function deleteItem(table, id){
+  if(confirm('Delete this item? This cannot be undone.')) db.ref(table+'/'+id).remove();
+}
+
+function getNested(obj, path){
+  return path.split('.').reduce((o,k)=> (o||{})[k], obj);
+}
+function setNested(obj, path, value){
+  const parts = path.split('.');
+  let cur = obj;
+  for(let i=0;i<parts.length-1;i++){ cur[parts[i]] = cur[parts[i]] || {}; cur = cur[parts[i]]; }
+  cur[parts[parts.length-1]] = value;
+}
+
+function openFullscreenEditor(fieldKey){
+  richtextDraftKey = fieldKey;
+  document.getElementById('fullscreen-editor-overlay').classList.add('active');
+
+  if(!fullscreenQuill){
+    fullscreenQuill = new Quill('#quill-editor-fullscreen', {
+      theme: 'snow',
+      placeholder: 'Write the article here…',
+      modules: {
+        toolbar: [
+          [{header:[1,2,3,false]}],
+          ['bold','italic','underline','strike'],
+          [{color:[]},{background:[]}],
+          [{list:'ordered'},{list:'bullet'}, {indent:'-1'},{indent:'+1'}],
+          ['blockquote','code-block'],
+          [{align:[]}],
+          ['link','image','video'],
+          ['clean']
+        ]
+      }
+    });
+    fullscreenQuill.getModule('toolbar').addHandler('image', ()=>{
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = ()=>{
+        const file = input.files[0];
+        if(!file) return;
+        uploadToCloudinary(file, url=>{
+          const range = fullscreenQuill.getSelection(true) || {index: fullscreenQuill.getLength()};
+          fullscreenQuill.insertEmbed(range.index, 'image', url);
+        });
+      };
+      input.click();
+    });
+  }
+  fullscreenQuill.root.innerHTML = richtextDraft || '';
+  setTimeout(()=> fullscreenQuill.focus(), 50);
+}
+
+function closeFullscreenEditor(save){
+  if(save){
+    richtextDraft = fullscreenQuill.root.innerHTML;
+    if(richtextDraftKey){
+      const previewEl = document.getElementById('preview-'+richtextDraftKey);
+      if(previewEl) previewEl.innerHTML = richtextDraft;
+    }
+  }
+  document.getElementById('fullscreen-editor-overlay').classList.remove('active');
+}
+
+function openForm(schemaKey, existing, id){
+  currentSchemaKey = schemaKey; editingId = id || null;
+  const schema = schemas[schemaKey];
+  document.getElementById('modal-title').textContent = (id ? 'Edit ' : 'Add ') + schema.label;
+  const fieldsEl = document.getElementById('modal-fields');
+  fieldsEl.innerHTML = schema.fields.map(f=>{
+    const raw = existing ? getNested(existing, f.key) : undefined;
+    if(f.type === 'select'){
+      const cur = (raw !== undefined && raw !== '') ? raw : (f.default ? f.default(existing) : f.options[0][0]);
+      return `<div style="margin-bottom:14px;"><label>${f.label}</label><select id="f-${f.key}">${f.options.map(o=>`<option value="${o[0]}"${o[0]===cur?' selected':''}>${o[1]}</option>`).join('')}</select></div>`;
+    }
+    if(f.type === 'checkbox'){
+      return `<div style="margin-bottom:14px;"><label><input type="checkbox" id="f-${f.key}" ${raw ? 'checked':''}> ${f.label}</label></div>`;
+    }
+    if(f.type === 'textarea'){
+      return `<div style="margin-bottom:14px;"><label>${f.label}</label><textarea id="f-${f.key}" style="min-height:80px;">${esc(raw||'')}</textarea></div>`;
+    }
+    if(f.type === 'list'){
+      const val = Array.isArray(raw) ? raw.join(', ') : (raw||'');
+      return `<div style="margin-bottom:14px;"><label>${f.label}</label><input id="f-${f.key}" value="${esc(val)}"></div>`;
+    }
+    if(f.type === 'richtext'){
+      return `<div style="margin-bottom:14px;"><label>${f.label}</label>
+        <div class="richtext-preview" id="preview-${f.key}"></div>
+        <button type="button" class="open-editor-btn" onclick="openFullscreenEditor('${f.key}')">✏️ Open Full-Screen Editor</button>
+      </div>`;
+    }
+    if(f.image){
+      const val = esc(raw??'');
+      return `<div style="margin-bottom:14px;"><label>${f.label}</label>
+        <div class="img-upload-row">
+          <input id="f-${f.key}" value="${val}">
+          <input type="file" accept="image/*" id="f-upload-${f.key}" style="display:none" onchange="handleImageUpload(this, 'f-${f.key}')">
+          <button type="button" class="upload-btn" onclick="document.getElementById('f-upload-${f.key}').click()">⬆ Upload</button>
+        </div>
+      </div>`;
+    }
+    if(f.video){
+      const val = esc(raw??'');
+      return `<div style="margin-bottom:14px;"><label>${f.label}</label>
+        <div class="img-upload-row">
+          <input id="f-${f.key}" value="${val}">
+          <input type="file" accept="video/*" id="f-upload-${f.key}" style="display:none" onchange="handleVideoUpload(this, 'f-${f.key}')">
+          <button type="button" class="upload-btn" onclick="document.getElementById('f-upload-${f.key}').click()">⬆ Upload Video</button>
+        </div>
+      </div>`;
+    }
+    return `<div style="margin-bottom:14px;"><label>${f.label}</label><input type="${f.type}" id="f-${f.key}" value="${esc(raw??'')}"></div>`;
+  }).join('');
+
+  schema.fields.forEach(f=>{
+    if(!f.showIf) return;
+    const el = document.getElementById('f-'+f.key);
+    const box = el && el.closest('[style*="margin-bottom"]');
+    const depKey = Object.keys(f.showIf)[0];
+    const dep = document.getElementById('f-'+depKey);
+    if(!box || !dep) return;
+    const update = ()=>{ box.style.display = (dep.value === f.showIf[depKey]) ? '' : 'none'; };
+    dep.addEventListener('change', update);
+    update();
+  });
+
+  const richtextField = schema.fields.find(f=>f.type==='richtext');
+  if(richtextField){
+    richtextDraftKey = richtextField.key;
+    richtextDraft = (existing ? getNested(existing, richtextField.key) : '') || '';
+    document.getElementById('preview-'+richtextField.key).innerHTML = richtextDraft;
+  } else {
+    richtextDraftKey = null;
+    richtextDraft = '';
+  }
+
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function editItem(schemaKey, id){
+  const table = schemas[schemaKey].table;
+  db.ref(table+'/'+id).once('value').then(snap=> openForm(schemaKey, snap.val(), id));
+}
+function closeForm(){ document.getElementById('modal-overlay').classList.remove('active'); }
+
+function saveForm(){
+  const schema = schemas[currentSchemaKey];
+  const data = Object.assign({}, schema.extra || {});
+  schema.fields.forEach(f=>{
+    let val;
+    if(f.type === 'richtext'){ setNested(data, f.key, richtextDraft || ''); return; }
+    const el = document.getElementById('f-'+f.key);
+    if(f.type === 'checkbox'){ val = el.checked; }
+    else if(f.type === 'number'){ val = Number(el.value) || 0; }
+    else if(f.type === 'list'){ val = el.value.split(',').map(s=>s.trim()).filter(Boolean); }
+    else { val = el.value; }
+    setNested(data, f.key, val);
+  });
+  if(data.youtubeId){
+    const m = String(data.youtubeId).trim().match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);
+    data.youtubeId = m ? m[1] : String(data.youtubeId).trim();
+  }
+  if(data.series === 'kka'){
+    const missing = (data.videoSource === 'youtube' && !data.youtubeId) || (data.videoSource === 'github' && !data.videoUrl);
+    if(missing && !confirm('No video has been added for the "' + (data.videoSource === 'youtube' ? 'YouTube' : 'GitHub') + '" source yet. Save anyway?')) return;
+  }
+  const table = schema.table;
+  const promise = editingId ? db.ref(table+'/'+editingId).update(data) : db.ref(table).push(data);
+  promise.then(()=> closeForm()).catch(err=> alert('Save failed: ' + err.message));
+}
+</script>
+<script>
+/* ===== Short Links tab ===== */
+(function(){
+  const $s = id => document.getElementById(id);
+  const DOM_PATH = 'siteSettings/shortLinkDomains';
+  // names that already belong to real pages on this site — a short link can't use them
+  const RESERVED = ['go','admin','login','profile','contact','kka','kka-episode','nach','nach-episode','nach-heroes','halachos','halacha-article','magazine','moshiach','search','reset','reset-password','index','404','10','privacy-policy','terms-of-service','sitemap','favicon','robots','style','site','firebase-init','cloudinary-config','_redirects'];
+  let domains = [], domain = location.origin, data = {}, started = false, editing = null;
+  const cleanDomain = v => {
+    let d = String(v||'').trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+    return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:\d+)?$/.test(d) ? 'https://'+d : '';
+  };
+  const base = () => domain.replace(/\/$/,'') + '/';
+  function fillDomains(){
+    const all = [location.origin].concat(domains.filter(d=>d!==location.origin));
+    if(all.indexOf(domain) < 0) domain = location.origin;
+    $s('sl-domain').innerHTML = all.map(d=>'<option value="'+esc(d)+'"'+(d===domain?' selected':'')+'>'+esc(d.replace(/^https?:\/\//,''))+'</option>').join('') +
+      '<option value="__add">＋ Add another website…</option>' + (domains.length ? '<option value="__remove">－ Remove a website…</option>' : '');
+    $s('sl-example').textContent = base() + 'name';
+  }
+  async function saveDomains(){ try{ await db.ref(DOM_PATH).set(domains.length ? domains : null); }catch(e){ msg('Saved on this screen only — the database said no permission for the website list.', false); } }
+  $s('sl-domain').addEventListener('change', async e=>{
+    const v = e.target.value;
+    if(v === '__add'){
+      const d = cleanDomain(prompt('Which website? For example:  mysite.com'));
+      if(d){ if(domains.indexOf(d)<0 && d!==location.origin) domains.push(d); domain = d; await saveDomains(); }
+    } else if(v === '__remove'){
+      const d = cleanDomain(prompt('Remove which website from the list?\n' + domains.map(x=>x.replace(/^https?:\/\//,'')).join('\n')));
+      if(d && domains.indexOf(d)>=0){ domains = domains.filter(x=>x!==d); if(domain===d) domain = location.origin; await saveDomains(); }
+    } else { domain = v; }
+    fillDomains(); render();
+  });
+  fillDomains();
+
+  const msg = (t, ok) => { const m = $s('sl-msg'); m.style.color = ok ? '#2E7D4F' : '#D64545'; m.textContent = t; };
+  const clean = v => String(v||'').toLowerCase().trim().replace(/[^a-z0-9-_]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+
+  function render(){
+    const tb = $s('table-shortlinks');
+    const keys = Object.keys(data).sort((a,b)=>(data[b].created||0)-(data[a].created||0));
+    if(!keys.length){ tb.innerHTML = '<tr class="empty-row"><td colspan="4">No short links yet.</td></tr>'; return; }
+    tb.innerHTML = keys.map(k=>{
+      const v = data[k];
+      return '<tr><td><strong>/'+esc(k)+'</strong></td>'+
+        '<td style="max-width:260px;word-break:break-all;">'+esc(v.url)+(v.note?'<br><span style="color:var(--fg-soft);font-size:12px;">'+esc(v.note)+'</span>':'')+'</td>'+
+        '<td>'+(v.clicks||0)+'</td>'+
+        '<td><div class="row-actions">'+
+          '<button class="icon-btn" data-a="copy" data-k="'+esc(k)+'">📋 Copy</button>'+
+          '<button class="icon-btn" data-a="edit" data-k="'+esc(k)+'">✏️ Edit</button>'+
+          '<button class="icon-btn danger" data-a="del" data-k="'+esc(k)+'">Delete</button>'+
+        '</div></td></tr>';
+    }).join('');
+  }
+
+  $s('table-shortlinks').addEventListener('click', e=>{
+    const b = e.target.closest('button[data-a]'); if(!b) return;
+    const k = b.dataset.k, v = data[k]; if(!v) return;
+    if(b.dataset.a==='copy'){ navigator.clipboard.writeText(base()+k); b.textContent='Copied!'; setTimeout(()=>b.textContent='📋 Copy',1500); }
+    if(b.dataset.a==='edit'){ editing=k; $s('sl-slug').value=k; $s('sl-url').value=v.url; $s('sl-note').value=v.note||''; window.scrollTo({top:0,behavior:'smooth'}); msg('Editing /'+k+' — change the destination and Save.', true); }
+    if(b.dataset.a==='del'){ if(confirm('Delete /'+k+'? Anyone using this link will see "not found".')) db.ref('shortLinks/'+k).remove(); }
+  });
+
+  window.slClear = ()=>{ editing=null; $s('sl-slug').value=''; $s('sl-url').value=''; $s('sl-note').value=''; msg('',true); };
+
+  window.slSave = async ()=>{
+    let slug = clean($s('sl-slug').value);
+    let url = $s('sl-url').value.trim();
+    const note = $s('sl-note').value.trim();
+    if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if(!/^https?:\/\/[^\s]+\.[^\s]+/i.test(url)) return msg('Please enter a valid web address.', false);
+    if(RESERVED.indexOf(slug) >= 0) return msg('“'+slug+'” is already used by a page on the site — please pick a different name.', false);
+    if(!slug){ do{ slug = Math.random().toString(36).slice(2,7); }while(data[slug] || RESERVED.indexOf(slug)>=0); }
+    if(data[slug] && editing!==slug && !confirm('/'+slug+' already exists. Replace where it goes?')) return;
+    try{
+      if(data[slug]) await db.ref('shortLinks/'+slug).update({url, note});
+      else await db.ref('shortLinks/'+slug).set({url, note, clicks:0, created:Date.now()});
+      const full = base()+slug;
+      try{ navigator.clipboard.writeText(full); }catch(e){}
+      msg('Saved! '+full+' (copied)', true);
+      editing=null; $s('sl-slug').value=''; $s('sl-url').value=''; $s('sl-note').value='';
+    }catch(err){ msg('Could not save: '+err.message, false); }
+  };
+
+  // start listening the first time the tab is opened (admin is already signed in by then)
+  document.querySelector('.admin-nav-item[data-section="shortlinks"]').addEventListener('click', ()=>{
+    if(started) return; started = true;
+    db.ref(DOM_PATH).once('value').then(sn=>{ const v = sn.val(); domains = (Array.isArray(v) ? v : Object.values(v||{})).filter(d=>typeof d==='string'); fillDomains(); render(); }).catch(()=>{});
+    db.ref('shortLinks').on('value', snap=>{ data = snap.val() || {}; render(); },
+      err=>{ $s('table-shortlinks').innerHTML='<tr class="empty-row"><td colspan="4">Could not load: '+esc(err.message)+'</td></tr>'; });
+  });
+})();
+</script>
+<script>
+/* ===== Upload rules, access code and Admin Settings ===== */
+(function(){
+"use strict";
+const OWNER="JewishKidsHub", REPO="Assets", BRANCH="main";
+const PUBLIC_BASE="https://assets.jewishkidshub.com/";
+const RULES_PATH="siteSettings/uploadRules";
+const LS_CODE="gh_token", LS_RULES="jkh_upload_rules", LS_FUN="jkh_admin_fun", LS_RECENT="jkh_recent_uploads";
+const TEAM_PATH="adminSecrets/uploadCode";
+const VS_PATH="siteSettings/videoStorage", VSK_PATH="adminSecrets/videoKey", LS_VK="jkh_video_key";
+const NO_CODE_MSG="Sorry — you don't have permission to upload files. Ask an admin to add the upload code in Admin Settings.";
+const DEFAULTS={imgFolder:"images",vidFolder:"videos",fileFolder:"files",naming:"ask",pattern:"{name}",shrink:true,shrinkMax:1800,maxVideoMB:90,kinds:{}};
+const $=id=>document.getElementById(id);
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
+const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
+const jget=(k,d)=>{try{return JSON.parse(lsGet(k,"")||"null")||d;}catch(e){return d;}};
+const scrub=m=>String(m||"").replace(/github/ig,"the server");
+const clampInt=(v,lo,hi,d)=>{v=parseInt(v,10);return isNaN(v)?d:Math.min(hi,Math.max(lo,v));};
+const esc2=s=>String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+function cleanPart(s){return String(s||"").toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9._-]/g,"").replace(/-+/g,"-").replace(/^[-.]+|[-.]+$/g,"");}
+function cleanFolder(s){return String(s||"").split("/").map(cleanPart).filter(Boolean).join("/");}
+function normRules(r){
+  const o=Object.assign({},DEFAULTS,r||{});
+  o.kinds=Object.assign({},(r&&r.kinds)||{});
+  o.shrink=!(o.shrink===false||o.shrink==="false");
+  o.shrinkMax=clampInt(o.shrinkMax,400,6000,1800);
+  o.maxVideoMB=clampInt(o.maxVideoMB,1,95,90);
+  if(o.naming!=="ask"&&o.naming!=="auto")o.naming="ask";
+  o.imgFolder=cleanFolder(o.imgFolder)||"images";
+  o.vidFolder=cleanFolder(o.vidFolder)||"videos";
+  o.fileFolder=cleanFolder(o.fileFolder)||"files";
+  o.pattern=(o.pattern||"{name}").trim()||"{name}";
+  return o;
+}
+let rules=normRules(jget(LS_RULES,{})), rulesLoaded=false;
+async function loadRules(force){
+  if(rulesLoaded&&!force)return rules;
+  try{
+    const snap=await db.ref(RULES_PATH).once("value");
+    rules=normRules(snap.val()||jget(LS_RULES,{}));
+    rulesLoaded=true;
+    lsSet(LS_RULES,JSON.stringify(rules));
+  }catch(e){ rules=normRules(jget(LS_RULES,{})); }
+  return rules;
+}
+
+/* ---- the list of places a file can be uploaded from ---- */
+function kindsList(){
+  const out=[];
+  try{Object.keys(schemas).forEach(sk=>{const sc=schemas[sk];(sc.fields||[]).forEach(f=>{
+    if(f.image||f.video)out.push({id:sk+":"+f.key,label:sc.label+" — "+String(f.label).replace(/\s*\(.*$/,""),media:f.video?"video":"image"});
+  });});}catch(e){}
+  try{IMAGE_KEYS.forEach(k=>out.push({id:"pageimages:"+k.key,label:"Site image — "+k.label,media:"image"}));}catch(e){}
+  out.push({id:"editor",label:"Pictures inside articles",media:"image"});
+  out.push({id:"manual",label:"Upload Files tab",media:"any"});
+  return out;
+}
+
+/* ---- names ---- */
+function tokenVals(file,kindId,sample){
+  const d=new Date(),p=n=>String(n).padStart(2,"0");
+  let title="",episode="";
+  if(sample){title="birthday";episode="10";}
+  else if(kindId&&kindId.indexOf(":")>0&&kindId.indexOf("pageimages")!==0){
+    const t=$("f-title"),e=$("f-episode");title=t?t.value:"";episode=e?e.value:"";
+  }
+  return {name:(file?file.name:"my photo").replace(/\.[^.]+$/,""),title:title,episode:episode,
+    date:d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()),time:p(d.getHours())+p(d.getMinutes()),
+    rand:Math.random().toString(36).slice(2,6),kind:String(kindId||"file").replace(/:/g,"-")};
+}
+const expand=(pat,vals)=>pat.replace(/\{(\w+)\}/g,(m,k)=>(k in vals)?vals[k]:m);
+function extOf(file){
+  const m=/\.[A-Za-z0-9]{1,6}$/.exec(file?file.name:"");
+  if(m)return m[0].toLowerCase();
+  return ({"image/jpeg":".jpg","image/png":".png","image/gif":".gif","image/webp":".webp","video/mp4":".mp4","video/quicktime":".mov"})[file&&file.type]||"";
+}
+function mediaOf(file){return file.type&&file.type.indexOf("image/")===0?"image":(file.type&&file.type.indexOf("video/")===0?"video":"file");}
+function effective(kindId,media,R){
+  R=R||rules;const k=(R.kinds&&R.kinds[kindId])||{};
+  const def=media==="video"?R.vidFolder:(media==="file"?R.fileFolder:R.imgFolder);
+  return {folder:cleanFolder(k.folder)||def,
+    naming:(k.naming==="ask"||k.naming==="auto")?k.naming:R.naming,
+    pattern:(k.pattern&&k.pattern.trim())?k.pattern.trim():R.pattern};
+}
+function suggestBase(file,kindId,media,R,sample){
+  const eff=effective(kindId,media,R);
+  const out=cleanPart(expand(eff.pattern,tokenVals(file,kindId,sample)));
+  return out||cleanPart((file?file.name:"file").replace(/\.[^.]+$/,""))||"file";
+}
+
+/* ---- the upload code: this device first, then the shared team code ---- */
+let teamCode=null,teamChecked=false;
+async function loadTeamCode(force){
+  if(teamChecked&&!force)return teamCode;
+  try{const s=await db.ref(TEAM_PATH).once("value");teamCode=s.val()||null;teamChecked=true;}
+  catch(e){teamCode=null;}
+  return teamCode;
+}
+async function getCode(){return lsGet(LS_CODE,"")||(await loadTeamCode())||"";}
+
+/* ---- the upload itself ---- */
+function permErr(m,status){const e=new Error(m);e.perm=true;e.status=status;return e;}
+/* turns a refusal from the file storage into a plain, specific explanation (and never names the service) */
+function authFail(status,apiMsg){
+  apiMsg=String(apiMsg||"");
+  if(status===401)return permErr("Sorry — the upload code isn't valid. It may have expired or been typed wrong. Check it in Admin Settings.",401);
+  if(status===403&&/rate limit|abuse|secondary|too many/i.test(apiMsg))return new Error("Too many uploads at once — wait a minute and try again.");
+  if(status===403)return permErr("Sorry — the upload code is valid but doesn't have permission to add files. It needs to be re-created with read and write access to the Assets storage.",403);
+  return permErr("Sorry — the upload code can't reach the file storage (it may not have access to it). Check it in Admin Settings.",404);
+}
+const msgOf=async r=>{try{return(await r.json()).message||"";}catch(e){return"";}};
+const toB64=(b,onProg)=>new Promise((res,rej)=>{const r=new FileReader();
+  if(onProg)r.onprogress=e=>{if(e.lengthComputable)onProg(e.loaded/e.total);};
+  r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(b);});
+/* sends the file and reports how much has really gone up (fetch can't do that, XMLHttpRequest can) */
+function xhrPut(url,headers,body,onProg){
+  return new Promise((res,rej)=>{
+    const x=new XMLHttpRequest();
+    x.open("PUT",url);
+    Object.keys(headers).forEach(k=>x.setRequestHeader(k,headers[k]));
+    if(x.upload)x.upload.onprogress=e=>{if(e.lengthComputable&&onProg)onProg(e.loaded/e.total);};
+    x.onload=()=>res({status:x.status,ok:x.status>=200&&x.status<300,json:async()=>{try{return JSON.parse(x.responseText);}catch(e){return{};}}});
+    x.onerror=()=>rej(new Error("Network problem — check your connection and try again."));
+    x.ontimeout=x.onerror;x.onabort=x.onerror;
+    x.send(body);
+  });
+}
+/* floating percentage bar (used by the upload buttons inside forms) */
+let pw=null,pwTimer=null;
+function pwEl(){
+  if(pw)return pw;
+  pw=document.createElement("div");pw.id="up-progress";pw.setAttribute("role","status");
+  pw.innerHTML='<div class="up-p-top"><span class="up-p-label"></span><span class="up-p-pct">0%</span></div><div class="up-p-bar"><i></i></div>';
+  document.body.appendChild(pw);return pw;
+}
+function progressShow(name){clearTimeout(pwTimer);const e=pwEl();e.classList.remove("done");e.dataset.name=name||"";e.classList.add("show");progressSet("Getting ready…",0);}
+function progressSet(label,pct){
+  const e=pwEl(),p=Math.max(0,Math.min(100,Math.round(pct||0))),n=e.dataset.name;
+  e.querySelector(".up-p-label").textContent=String(label).replace(/…$/,"")+(n?" — "+n:"");
+  e.querySelector(".up-p-pct").textContent=p+"%";e.querySelector("i").style.width=p+"%";
+}
+function progressDone(ok){
+  const e=pwEl();clearTimeout(pwTimer);
+  if(ok){e.classList.add("done");progressSet("Uploaded ✓",100);pwTimer=setTimeout(()=>e.classList.remove("show"),1800);}
+  else{e.classList.remove("show");}
+}
+async function shrink(file){
+  if(!rules.shrink||file.type!=="image/jpeg"||file.size<1.5*1048576)return file;
+  try{
+    const bmp=await createImageBitmap(file);
+    const sc=Math.min(1,rules.shrinkMax/Math.max(bmp.width,bmp.height));
+    const c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);
+    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",0.85));
+    return(blob&&blob.size<file.size)?blob:file;
+  }catch(e){return file;}
+}
+
+/* ---- optional separate video storage (own domain) ---- */
+let vs=null,vsChecked=false;
+async function loadVS(force){
+  if(vsChecked&&!force)return vs;
+  vs=null;
+  try{
+    const c=(await db.ref(VS_PATH).once("value")).val();
+    let key=lsGet(LS_VK,"");
+    if(!key){try{key=(await db.ref(VSK_PATH).once("value")).val()||"";}catch(e){}}
+    if(c&&c.workerUrl&&c.publicBase&&key)vs={url:String(c.workerUrl).replace(/\/+$/,""),base:String(c.publicBase).replace(/\/*$/,"/"),key:key};
+  }catch(e){vs=null;}
+  vsChecked=true;return vs;
+}
+async function uploadVS(v,o,rep){
+  const enc=p=>p.split("/").map(encodeURIComponent).join("/");
+  const hdr={"X-Upload-Key":v.key};
+  let name=o.base+o.ext,path=(o.folder?o.folder+"/":"")+name;
+  rep("Checking…",3);
+  let ex;
+  try{ex=await fetch(v.url+"/exists?path="+encodeURIComponent(path),{headers:hdr});}
+  catch(e){throw new Error("Can't reach the video storage — check your connection and try again.");}
+  if(ex.status===401||ex.status===403)throw permErr("The video upload key wasn't accepted. Check it in Admin Settings → Video storage.",401);
+  let replaced=false;
+  if(ex.ok&&(await ex.json()).exists){
+    if(o.onExists==="ask"){
+      if(!confirm("A file called "+name+" already exists. Replace it?")){const c=new Error("cancelled");c.cancelled=true;throw c;}
+      replaced=true;
+    }else{
+      name=o.base+"-"+Math.random().toString(36).slice(2,6)+o.ext;
+      path=(o.folder?o.folder+"/":"")+name;
+    }
+  }
+  rep("Uploading…",5);
+  const res=await xhrPut(v.url+"/put?path="+encodeURIComponent(path),Object.assign({"Content-Type":o.file.type||"video/mp4"},hdr),o.file,
+    f=>rep(f>=1?"Saving…":"Uploading…",5+f*93));
+  if(res.status===401||res.status===403)throw permErr("The video upload key wasn't accepted. Check it in Admin Settings → Video storage.",401);
+  if(res.status===413)throw new Error("That video is too big for this upload (100MB limit). Try a smaller one.");
+  if(!res.ok)throw new Error("Video upload failed ("+res.status+").");
+  rep("Done",100);
+  const url=v.base+enc(path);
+  addRecent(name,url);
+  return {url:url,path:path,name:name,replaced:replaced};
+}
+async function doUpload(o){
+  if(o.media==="video"){const v=await loadVS();if(v)return uploadVS(v,o,function(t,p){if(o.status)o.status(t,p);});}
+  const rep=(t,p)=>{if(o.status)o.status(t,p);};
+  rep("Getting ready…",1);
+  const local=lsGet(LS_CODE,""),team=await loadTeamCode();
+  const codes=[];
+  if(local)codes.push({v:local,src:"device"});
+  if(team&&team!==local)codes.push({v:team,src:"team"});
+  if(!codes.length)throw permErr(NO_CODE_MSG);
+  for(let i=0;i<codes.length;i++){
+    try{return await uploadWith(codes[i].v,o,rep);}
+    catch(e){
+      if(e.perm&&e.status===401&&codes[i].src==="device")lsDel(LS_CODE);   // a code that's plainly invalid is forgotten
+      if(!e.perm||i===codes.length-1)throw e;                              // otherwise try the next code (e.g. the shared team one)
+    }
+  }
+}
+async function uploadWith(code,o,rep){
+  const hdr={Authorization:"Bearer "+code,Accept:"application/vnd.github+json"};
+  const enc=p=>p.split("/").map(encodeURIComponent).join("/");
+  const api=p=>"https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+enc(p);
+  let name=o.base+o.ext,path=(o.folder?o.folder+"/":"")+name;
+  rep("Checking…",3);
+  const chk=await fetch(api(path)+"?ref="+BRANCH,{headers:hdr});
+  if(chk.status===401||chk.status===403)throw authFail(chk.status,await msgOf(chk));
+  let sha;
+  if(chk.ok){
+    if(o.onExists==="ask"){
+      if(!confirm("A file called "+name+" already exists. Replace it?")){const c=new Error("cancelled");c.cancelled=true;throw c;}
+      sha=(await chk.json()).sha;
+    }else{
+      name=o.base+"-"+Math.random().toString(36).slice(2,6)+o.ext;
+      path=(o.folder?o.folder+"/":"")+name;
+    }
+  }
+  rep("Getting ready…",5);
+  const body=o.media==="image"?await shrink(o.file):o.file;
+  const content=await toB64(body,f=>rep("Getting ready…",5+f*7));          // 5% → 12%
+  const payload=JSON.stringify({message:"Upload "+path,content:content,branch:BRANCH,sha:sha});
+  rep("Uploading…",12);
+  const res=await xhrPut(api(path),Object.assign({"Content-Type":"application/json"},hdr),payload,   // 12% → 97%
+    f=>rep(f>=1?"Saving…":"Uploading…",12+f*85));
+  rep("Saving…",98);
+  if(res.status===401||res.status===403||res.status===404)throw authFail(res.status,await msgOf(res));
+  if(res.status===413||res.status===422)throw new Error("That file is too big, or can't be uploaded this way. Try a smaller one (under about 50MB), or use YouTube for videos.");
+  if(!res.ok){const m=await msgOf(res);throw new Error(scrub(m)||("Upload failed ("+res.status+")"));}
+  rep("Done",100);
+  const url=PUBLIC_BASE+enc(path);
+  addRecent(name,url);
+  return {url:url,path:path,name:name,replaced:!!sha};
+}
+
+/* ---- the upload buttons inside the forms ---- */
+let pendingCtx=null;
+function setCtx(targetId){
+  pendingCtx=null;
+  try{
+    if(targetId.indexOf("f-")===0&&typeof currentSchemaKey!=="undefined"&&currentSchemaKey)pendingCtx=currentSchemaKey+":"+targetId.slice(2);
+    else if(targetId.indexOf("imgfield-")===0)pendingCtx="pageimages:"+targetId.slice(9);
+  }catch(e){}
+}
+function formUpload(file,media,onSuccess,onError){
+  const kindId=pendingCtx||"editor";pendingCtx=null;
+  const fail=e=>{
+    if(e&&e.cancelled)toast("Upload cancelled.");else toast(scrub(e&&e.message)||"Upload failed.");
+    if(onError)onError();
+  };
+  (async()=>{
+    if(!(media==="video"&&(await loadVS()))&&!(await getCode()))throw permErr(NO_CODE_MSG);
+    if(!rulesLoaded)await loadRules();
+    if(media==="video"&&file.size>rules.maxVideoMB*1048576)throw new Error("That video is over "+rules.maxVideoMB+"MB. Use a YouTube link instead.");
+    const eff=effective(kindId,media);
+    let base=suggestBase(file,kindId,media);const ext=extOf(file);
+    if(eff.naming==="ask"){
+      const given=prompt("Name this "+media+" (the "+ext+" is added for you):",base);
+      if(given===null){const c=new Error("cancelled");c.cancelled=true;throw c;}
+      let g=given.trim();if(ext&&g.toLowerCase().endsWith(ext))g=g.slice(0,-ext.length);
+      base=cleanPart(g)||base;
+    }
+    progressShow(base+ext);
+    let r;
+    try{
+      r=await doUpload({file:file,media:media,folder:eff.folder,base:base,ext:ext,onExists:eff.naming==="ask"?"ask":"rename",
+        status:(t,p)=>progressSet(t,p)});
+    }catch(e){progressDone(false);throw e;}
+    progressDone(true);
+    onSuccess(r.url);
+    toast(media[0].toUpperCase()+media.slice(1)+" uploaded! It goes live in about 30 seconds.");
+    celebrate();
+  })().catch(fail);
+}
+window.uploadToCloudinary=function(file,ok,err){
+  if(file.type.indexOf("image/")!==0){toast("Please choose an image file.");if(err)err();return;}
+  formUpload(file,"image",ok,err);
+};
+window.uploadVideoToCloudinary=function(file,ok,err){
+  if(file.type.indexOf("video/")!==0){toast("Please choose a video file.");if(err)err();return;}
+  formUpload(file,"video",ok,err);
+};
+["handleImageUpload","handleVideoUpload"].forEach(fn=>{
+  const orig=window[fn];if(typeof orig!=="function")return;
+  window[fn]=function(inputEl,targetId){setCtx(String(targetId||""));return orig.apply(this,arguments);};
+});
+
+/* ---- Upload Files tab ---- */
+let queue=[];
+function addFiles(fs){
+  fs.forEach(f=>{
+    const media=mediaOf(f);
+    const el=document.createElement("div");el.className="ghu-item";
+    el.innerHTML='<div class="nm"></div><input class="uf-name" placeholder="File name" style="margin:8px 0 0;"><div class="ghu-bar"><i></i></div><div class="st"></div>';
+    el.querySelector(".nm").textContent=f.name+"  ("+(f.size/1048576).toFixed(2)+" MB)";
+    el.querySelector(".uf-name").value=suggestBase(f,"manual",media);
+    $("uf-list").appendChild(el);queue.push({file:f,el:el,media:media});
+  });
+  $("uf-go").disabled=!queue.length;
+}
+window.ufUploadAll=async function(){
+  $("uf-go").disabled=true;
+  if(!rulesLoaded)await loadRules();
+  const todo=queue;queue=[];
+  for(const it of todo){
+    const bar=it.el.querySelector(".ghu-bar i"),st=it.el.querySelector(".st");
+    try{
+      if(it.media==="video"&&it.file.size>rules.maxVideoMB*1048576)throw new Error("That video is over "+rules.maxVideoMB+"MB. Use a YouTube link instead.");
+      const ext=extOf(it.file);
+      let nm=it.el.querySelector(".uf-name").value.trim();if(ext&&nm.toLowerCase().endsWith(ext))nm=nm.slice(0,-ext.length);
+      const base=cleanPart(nm)||suggestBase(it.file,"manual",it.media);
+      const typed=cleanFolder($("uf-folder").value);
+      const eff=effective("manual",it.media);
+      const r=await doUpload({file:it.file,media:it.media,folder:typed||eff.folder,base:base,ext:ext,onExists:"ask",
+        status:(t,p)=>{const n=Math.round(p||0);st.innerHTML='<b>'+esc2(String(t).replace(/…$/,""))+'… '+n+'%</b>';bar.style.width=n+"%";}});
+      bar.style.width="100%";
+      st.innerHTML='<span class="ghu-ok">✅ Uploaded'+(r.replaced?" (replaced old file)":"")+'</span><div class="ghu-url"></div><button class="icon-btn" type="button">📋 Copy link</button> <span style="font-size:12px;color:var(--fg-soft);">Live in ~30 seconds.</span>';
+      st.querySelector(".ghu-url").textContent=r.url;
+      st.querySelector("button").onclick=e=>{navigator.clipboard.writeText(r.url);e.target.textContent="Copied!";};
+      celebrate();
+    }catch(err){
+      st.innerHTML='<span class="ghu-err">❌ '+esc2(err.cancelled?"Cancelled.":scrub(err.message))+'</span>';
+      if(err.perm){refreshAccess();break;}
+    }
+  }
+  $("uf-files").value="";
+  renderRecent();
+};
+function addRecent(name,url){
+  const list=jget(LS_RECENT,[]);list.unshift({n:name,u:url,t:Date.now()});
+  lsSet(LS_RECENT,JSON.stringify(list.slice(0,15)));
+}
+function renderRecent(){
+  const box=$("uf-recent");if(!box)return;
+  const list=jget(LS_RECENT,[]);
+  if(!list.length){box.innerHTML='<p class="form-note" style="margin:0;">Nothing uploaded from this device yet.</p>';return;}
+  box.innerHTML=list.map((r,i)=>'<div class="ghu-item"><div class="nm">'+esc2(r.n)+'</div><div class="ghu-url">'+esc2(r.u)+'</div><button class="icon-btn" data-i="'+i+'">📋 Copy link</button></div>').join("");
+}
+window.ufClearRecent=function(){lsDel(LS_RECENT);renderRecent();};
+
+/* ---- Admin Settings: upload code ---- */
+function setMsg(id,text,ok){const m=$(id);if(!m)return;m.style.color=ok?"#2E7D4F":"#D64545";m.textContent=text;}
+async function refreshAccess(){
+  const local=!!lsGet(LS_CODE,"");
+  const team=await loadTeamCode();
+  const has=local||!!team||!!(await loadVS(true));
+  const pill=$("us-status");
+  if(pill){pill.className="pill2"+(has?" on":"");pill.textContent=has?"🔓 Uploads are on":"🔒 Uploads are locked";}
+  const ts=$("us-team-status");
+  if(ts)ts.textContent=(team?"👥 A team code is saved — every admin can upload without entering anything. ":"No team code shared yet. ")+(local?"This device also has its own code.":"");
+  if($("uf-lock"))$("uf-lock").style.display=has?"none":"";
+  if($("uf-card"))$("uf-card").style.display=has?"":"none";
+}
+
+
+/* ---- Admin Settings: email check ---- */
+async function evRefreshForm(){
+  try{
+    const c=(await db.ref("siteSettings/emailVerify").once("value")).val()||{};
+    if($("ev-url")&&!$("ev-url").value)$("ev-url").value=c.url||"";
+    if($("ev-on"))$("ev-on").checked=!!c.on;
+    if($("ev-signup"))$("ev-signup").checked=!!c.signup;
+    const pill=$("ev-status");if(pill){pill.className="pill2"+(c.on&&c.url?" on":"");pill.textContent=c.on&&c.url?"📧 On":"Off";}
+  }catch(e){}
+}
+window.evSave=async function(){
+  const url=$("ev-url").value.trim(),on=$("ev-on").checked,signup=$("ev-signup").checked;
+  if((on||signup)&&!/^https:\/\/script\.google\.com\//i.test(url)){setMsg("ev-msg","Paste the email service address first (it starts with https://script.google.com/).",false);return;}
+  try{await db.ref("siteSettings/emailVerify").set({url:url,on:on,signup:signup});
+    setMsg("ev-msg",(on||signup)?"✅ Saved."+(on?" Admins will be asked for an email code when they sign in.":"")+(signup?" New members will be asked for a code when they create an account.":""):"Saved. The email code is off.",true);evRefreshForm();}
+  catch(e){setMsg("ev-msg","Couldn't save — the database said no permission.",false);}
+};
+window.evTest=async function(){
+  const url=$("ev-url").value.trim(),u=auth.currentUser;
+  if(!url||!u){setMsg("ev-msg","Paste the email service address first.",false);return;}
+  setMsg("ev-msg","Sending…",true);
+  try{
+    const r=await fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"send",email:u.email})}).then(x=>x.json());
+    if(r.ok)setMsg("ev-msg","✅ Works! A code was sent to "+u.email+".",true);
+    else setMsg("ev-msg",r.message||("The service said: "+(r.error||"no")+". Is "+u.email+" on its admin list?"),false);
+  }catch(e){setMsg("ev-msg","Can't reach that address. Check it, and that the deployment is set to \"Anyone\".",false);}
+};
+/* ---- Admin Settings: video storage ---- */
+async function vsRefreshForm(){
+  try{
+    const c=(await db.ref(VS_PATH).once("value")).val()||{};
+    if($("vs-url")&&!$("vs-url").value)$("vs-url").value=c.workerUrl||"";
+    if($("vs-base")&&!$("vs-base").value)$("vs-base").value=c.publicBase||"";
+    const on=!!(c.workerUrl&&c.publicBase);
+    const pill=$("vs-status");if(pill){pill.className="pill2"+(on?" on":"");pill.textContent=on?"🎬 On":"Off";}
+  }catch(e){}
+}
+window.vsSave=async function(){
+  const url=$("vs-url").value.trim().replace(/\/+$/,""),base=$("vs-base").value.trim(),key=$("vs-key").value.trim();
+  if(!/^https:\/\//i.test(url)||!/^https:\/\//i.test(base)){setMsg("vs-msg","Both addresses need to start with https://",false);return;}
+  try{
+    await db.ref(VS_PATH).set({workerUrl:url,publicBase:base.replace(/\/*$/,"/")});
+    if(key){lsSet(LS_VK,key);try{await db.ref(VSK_PATH).set(key);}catch(e){setMsg("vs-msg","Saved, but the key could only be saved on this device (the database rules need the admin-only entry for the video key).",false);$("vs-key").value="";await loadVS(true);refreshAccess();vsRefreshForm();return;}}
+    $("vs-key").value="";
+    await loadVS(true);
+    setMsg("vs-msg","✅ Saved. New video uploads now go to your video address, for the whole team.",true);
+    refreshAccess();vsRefreshForm();
+  }catch(e){setMsg("vs-msg","Couldn't save — the database said no permission. The database rules need entries for the video settings (see the instructions).",false);}
+};
+window.vsCheck=async function(){
+  const v=await loadVS(true);
+  if(!v){setMsg("vs-msg","Not set up yet — fill in all three boxes and tap Save first.",false);return;}
+  setMsg("vs-msg","Checking…",true);
+  try{
+    const r=await fetch(v.url+"/ping",{headers:{"X-Upload-Key":v.key}});
+    if(r.ok)setMsg("vs-msg","✅ Works! Videos will upload to "+v.base,true);
+    else if(r.status===401||r.status===403)setMsg("vs-msg","The upload address works, but the key wasn't accepted. Paste the key again and Save.",false);
+    else setMsg("vs-msg","The upload address answered with an error ("+r.status+"). Check the address.",false);
+  }catch(e){setMsg("vs-msg","Can't reach the upload address. Check it for typos.",false);}
+};
+window.vsOff=async function(){
+  if(!confirm("Turn off separate video storage? New videos will go back to the normal file storage."))return;
+  try{await db.ref(VS_PATH).remove();try{await db.ref(VSK_PATH).remove();}catch(e){}lsDel(LS_VK);vs=null;vsChecked=true;
+    $("vs-url").value="";$("vs-base").value="";setMsg("vs-msg","Turned off.",true);refreshAccess();vsRefreshForm();}
+  catch(e){setMsg("vs-msg","Couldn't turn it off — the database said no permission.",false);}
+};
+window.upSaveCode=function(){
+  const v=$("us-code").value.trim();
+  if(!v){setMsg("us-code-msg","Paste the upload code first.",false);return;}
+  lsSet(LS_CODE,v);$("us-code").value="";refreshAccess();
+  setMsg("us-code-msg","Saved on this device. Tap Check to test it, or Share with the whole team.",true);
+};
+window.upSaveTeamCode=async function(){
+  const v=$("us-code").value.trim()||lsGet(LS_CODE,"");
+  if(!v){setMsg("us-code-msg","Paste the upload code first, then tap Share with the whole team.",false);return;}
+  try{
+    await db.ref(TEAM_PATH).set(v);
+    teamCode=v;teamChecked=true;$("us-code").value="";
+    setMsg("us-code-msg","✅ Shared. Every admin can now upload without entering anything.",true);
+    refreshAccess();
+  }catch(e){setMsg("us-code-msg","Couldn't share it — the database said no permission. The database rules need the admin-only entry for the team code (see the instructions).",false);}
+};
+window.upRemoveTeamCode=async function(){
+  if(!confirm("Remove the shared team code? Admins who haven't saved their own code on their device will be locked out of uploading."))return;
+  try{await db.ref(TEAM_PATH).remove();teamCode=null;teamChecked=true;setMsg("us-code-msg","Team code removed.",true);refreshAccess();}
+  catch(e){setMsg("us-code-msg","Couldn't remove it — the database said no permission.",false);}
+};
+window.upCheckCode=async function(){
+  const local=lsGet(LS_CODE,""),team=await loadTeamCode();
+  if(!local&&!team){setMsg("us-code-msg","No code saved yet — uploads are locked.",false);return;}
+  setMsg("us-code-msg","Checking…",true);
+  // a harmless test that needs the same permission as uploading, without changing any of your files
+  const test=async code=>{
+    const r=await fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/git/blobs",{method:"POST",
+      headers:{Authorization:"Bearer "+code,Accept:"application/vnd.github+json","Content-Type":"application/json"},
+      body:JSON.stringify({content:"check",encoding:"utf-8"})});
+    return {ok:r.status===201,status:r.status};
+  };
+  const verdict=r=>r.ok?"works for uploading":(r.status===401?"isn't valid (it may have expired or been typed wrong)":r.status===403?"is valid but can't add files — it needs read and write access":"can't reach the file storage — it doesn't have access to it");
+  try{
+    const parts=[];let anyOk=false;
+    if(local){const r=await test(local);anyOk=anyOk||r.ok;parts.push((r.ok?"✅":"❌")+" The code saved on this device "+verdict(r)+".");}
+    if(team&&team!==local){const r=await test(team);anyOk=anyOk||r.ok;parts.push((r.ok?"✅":"❌")+" The shared team code "+verdict(r)+".");}
+    setMsg("us-code-msg",parts.join(" "),anyOk);
+  }catch(e){setMsg("us-code-msg","Couldn't check right now — are you online?",false);}
+};
+window.upRemoveCode=function(){
+  if(!confirm("Remove the upload code from this device?"))return;
+  lsDel(LS_CODE);refreshAccess();setMsg("us-code-msg","Removed from this device.",true);
+};
+
+/* ---- Admin Settings: rules ---- */
+function renderSettings(){
+  $("us-img").value=rules.imgFolder;$("us-vid").value=rules.vidFolder;$("us-file").value=rules.fileFolder;
+  $("us-naming").value=rules.naming;$("us-pattern").value=rules.pattern;
+  $("us-shrink").checked=rules.shrink;$("us-shrinkmax").value=rules.shrinkMax;$("us-maxvid").value=rules.maxVideoMB;
+  $("us-kinds").innerHTML=kindsList().map(k=>{
+    const r=rules.kinds[k.id]||{};
+    return '<div class="up-kind" data-id="'+esc2(k.id)+'" data-media="'+k.media+'">'+
+      '<div class="up-kind-h"><b>'+esc2(k.label)+'</b><span class="pill2">'+(k.media==="any"?"any file":k.media)+'</span></div>'+
+      '<div class="up-grid">'+
+      '<div><label>Folder</label><input class="uk-folder" placeholder="Same as default" value="'+esc2(r.folder||"")+'"></div>'+
+      '<div><label>Naming</label><select class="uk-naming"><option value="">Same as default</option><option value="ask"'+(r.naming==="ask"?" selected":"")+'>Ask me each time</option><option value="auto"'+(r.naming==="auto"?" selected":"")+'>Name it automatically</option></select></div>'+
+      '<div class="up-wide"><label>Name pattern</label><input class="uk-pattern" placeholder="Same as default" value="'+esc2(r.pattern||"")+'"></div>'+
+      '</div><div class="up-prev">Example: <b></b></div></div>';
+  }).join("");
+  updatePreviews();
+}
+function collect(){
+  const r={imgFolder:$("us-img").value,vidFolder:$("us-vid").value,fileFolder:$("us-file").value,naming:$("us-naming").value,
+    pattern:$("us-pattern").value,shrink:$("us-shrink").checked,shrinkMax:$("us-shrinkmax").value,maxVideoMB:$("us-maxvid").value,kinds:{}};
+  document.querySelectorAll("#us-kinds .up-kind").forEach(row=>{
+    const f=cleanFolder(row.querySelector(".uk-folder").value),n=row.querySelector(".uk-naming").value,p=row.querySelector(".uk-pattern").value.trim();
+    const o={};if(f)o.folder=f;if(n)o.naming=n;if(p)o.pattern=p;
+    if(Object.keys(o).length)r.kinds[row.dataset.id]=o;
+  });
+  return normRules(r);
+}
+function updatePreviews(){
+  const R=collect();
+  document.querySelectorAll("#us-kinds .up-kind").forEach(row=>{
+    let media=row.dataset.media;if(media==="any")media="image";
+    const eff=effective(row.dataset.id,media,R);
+    const ex=media==="video"?".mp4":".jpg";
+    const nm=suggestBase({name:"my photo"+ex,type:""},row.dataset.id,media,R,true);
+    row.querySelector(".up-prev b").textContent=eff.folder+"/"+nm+ex+(eff.naming==="ask"?"  (you'll be asked first)":"");
+  });
+  const eff2=effective("default","image",R);
+  if($("us-example"))$("us-example").textContent=R.imgFolder+"/"+suggestBase({name:"my photo.jpg",type:""},"default","image",R,true)+".jpg";
+}
+window.upSaveRules=async function(){
+  rules=collect();lsSet(LS_RULES,JSON.stringify(rules));
+  try{
+    await db.ref(RULES_PATH).set(rules);rulesLoaded=true;
+    setMsg("us-rules-msg","✅ Saved for every admin.",true);setMsg("us-rules-msg2","✅ Saved for every admin.",true);
+  }catch(e){
+    const t="Saved on this device, but couldn't be saved for everyone (the database said no permission).";
+    setMsg("us-rules-msg",t,false);setMsg("us-rules-msg2",t,false);
+  }
+};
+window.upExport=function(){
+  const blob=new Blob([JSON.stringify({uploadRules:collect()},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="jkh-upload-settings.json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+window.upImport=function(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{const o=JSON.parse(r.result);rules=normRules(o.uploadRules||o);renderSettings();setMsg("us-rules-msg","Imported — press Save to keep these.",true);}
+    catch(e){setMsg("us-rules-msg","That file isn't a settings file.",false);}
+    input.value="";
+  };
+  r.readAsText(f);
+};
+
+/* ---- fun stuff ---- */
+const SWATCHES=[["#FF9900","Orange"],["#2f6fed","Blue"],["#1f9d55","Green"],["#8e44ad","Purple"],["#e84393","Pink"],["#d64545","Red"]];
+let fun=Object.assign({confetti:true,accent:""},jget(LS_FUN,{}));
+function applyAccent(){
+  if(fun.accent)document.documentElement.style.setProperty("--primary",fun.accent);
+  else document.documentElement.style.removeProperty("--primary");
+  document.querySelectorAll(".swatch").forEach(s=>s.classList.toggle("on",s.dataset.c===(fun.accent||"")));
+}
+function renderFun(){
+  $("us-swatches").innerHTML='<button type="button" class="swatch'+(fun.accent?"":" on")+'" data-c="" title="Original" style="background:#FF9900"></button>'+
+    SWATCHES.slice(1).map(s=>'<button type="button" class="swatch" data-c="'+s[0]+'" title="'+s[1]+'" style="background:'+s[0]+'"></button>').join("");
+  $("us-confetti").checked=!!fun.confetti;applyAccent();
+}
+function celebrate(force){
+  if(!fun.confetti&&!force)return;
+  const em=["🎉","✨","🌟","⭐","🎈","💛"];
+  for(let i=0;i<36;i++){
+    const s=document.createElement("span");s.className="confetti-bit";s.textContent=em[i%em.length];
+    s.style.left=Math.random()*100+"vw";s.style.animationDelay=(Math.random()*0.5)+"s";s.style.fontSize=(16+Math.random()*16)+"px";
+    document.body.appendChild(s);setTimeout(()=>s.remove(),3200);
+  }
+}
+window.upPreviewConfetti=function(){celebrate(true);};
+
+/* ---- wiring ---- */
+document.addEventListener("input",e=>{if(e.target.closest&&e.target.closest("#panel-adminsettings"))updatePreviews();});
+document.addEventListener("change",e=>{
+  if(e.target.closest&&e.target.closest("#panel-adminsettings"))updatePreviews();
+  if(e.target.id==="us-confetti"){fun.confetti=e.target.checked;lsSet(LS_FUN,JSON.stringify(fun));}
+});
+document.addEventListener("click",e=>{
+  const sw=e.target.closest&&e.target.closest(".swatch");
+  if(sw){fun.accent=sw.dataset.c;lsSet(LS_FUN,JSON.stringify(fun));applyAccent();}
+  const rb=e.target.closest&&e.target.closest("#uf-recent button[data-i]");
+  if(rb){const it=jget(LS_RECENT,[])[+rb.dataset.i];if(it){navigator.clipboard.writeText(it.u);rb.textContent="Copied!";}}
+});
+const drop=$("uf-drop");
+if(drop){
+  $("uf-files").onchange=e=>addFiles([...e.target.files]);
+  ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+  drop.addEventListener("drop",e=>addFiles([...e.dataTransfer.files]));
+}
+const navSet=document.querySelector('.admin-nav-item[data-section="adminsettings"]');
+if(navSet)navSet.addEventListener("click",()=>{refreshAccess();vsRefreshForm();evRefreshForm();loadRules(true).then(()=>{renderSettings();renderFun();});});
+const navUp=document.querySelector('.admin-nav-item[data-section="fileupload"]');
+if(navUp)navUp.addEventListener("click",()=>{refreshAccess();renderRecent();loadRules();});
+applyAccent();refreshAccess();renderRecent();
+})();
+</script>
+
+</body>
+</html>

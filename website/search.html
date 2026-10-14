@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search — Jewish Kids Hub</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://jewish-kids-hub-default-rtdb.asia-southeast1.firebasedatabase.app">
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navinner">
+    <a class="navbrand" href="/index.html"><img data-imgkey="logo" src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w1000" alt="Jewish Kids Hub logo"><span>Jewish Kids Hub</span></a>
+    <button id="navToggle">☰</button>
+    <div class="navlinks" id="navlinks">
+      <a href="/index.html" data-page="home">Home</a>
+      <a href="/kka.html" data-page="kka">Kids Kan Akomplish</a>
+      <a href="/nach-heroes.html" data-page="nach">Nach Heroes</a>
+      <a href="/halachos.html" data-page="halachos">Halachos</a>
+      <a href="/magazine.html" data-page="magazine">Magazine</a>
+      <a href="/moshiach.html" data-page="moshiach">Moshiach is in our hands</a>
+      <a href="/contact.html" data-page="contact">Contact</a>
+      <div class="nav-user-container" id="authNavContainer">
+        <button class="nav-signin-btn" id="navSignInBtn">👤 Sign In</button>
+        <div class="nav-user-menu" id="navUserMenu">
+          <a href="/profile.html">My Profile</a>
+          <button onclick="handleSignOut()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="page-enter">
+  <div class="page-header">
+    <div class="icon-badge">🔍</div>
+    <h1>Search Jewish Kids Hub</h1>
+    <p>Find videos, magazines, halachos, Nach Heroes and Moshiach episodes — by title, topic or number.</p>
+  </div>
+
+  <div class="wrap search-wrap">
+    <form class="s-form" id="sForm" role="search" autocomplete="off">
+      <input type="text" id="sInput" inputmode="search" enterkeyhint="search" placeholder="Try “Shabbos”, “episode 10” or “issue 3”" aria-label="Search the Jewish Kids Hub">
+      <button type="button" class="s-clear" id="sClear" aria-label="Clear search" hidden>✕</button>
+    </form>
+    <div class="s-chips" id="sChips" aria-label="Filter results"></div>
+    <div class="s-meta" id="sMeta" aria-live="polite"></div>
+    <div class="s-suggest" id="sSuggest"></div>
+    <div class="card-grid" id="sGrid"></div>
+    <div class="empty-state" id="sEmpty" style="display:none;">
+      <div class="icon">🔍</div>
+      <h3 id="sEmptyTitle">Nothing found</h3>
+      <p id="sEmptyText">Try a different word, or check the spelling.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand"><img data-imgkey="logo" src="https://drive.google.com/thumbnail?id=1i_sr5gaLwVl0U4XG12HctE2o0ya6cAA7&sz=w1000" alt="Jewish Kids Hub logo"><strong>Jewish Kids Hub</strong></div>
+        <p>Where Yiddishe kinderlach discover the special koach Hashem gave them to fill the world with Torah and light.</p>
+        <p style="margin-top:6px;">✉ jewishkidshub@gmail.com</p>
+      </div>
+      <div>
+        <h4>Our Departments</h4>
+        <a href="/index.html">Home</a>
+        <a href="/moshiach.html">Moshiach is in our Hands</a>
+        <a href="/magazine.html">Magazine</a>
+        <a href="/kka.html">Kids Kan Akomplish</a>
+        <a href="/halachos.html">Halachos For Kids</a>
+        <a href="/nach-heroes.html">Nach Heroes</a>
+        <a href="/contact.html">Contact Us</a>
+      </div>
+      <div>
+        <h4>Join Our Mailing List</h4>
+        <p>Sign up for the Jewish Kids Hub Mailing List and never miss an update!</p>
+        <form class="foot-form" id="notifForm">
+          <input type="email" placeholder="Your email" required id="notifEmail">
+          <button class="btn" type="submit" style="padding:10px 18px;">➤</button>
+        </form>
+        <a class="foot-link-cta" href="/contact.html" style="margin-top:14px;">Send us a message →</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 5786 Jewish Kids Hub. All rights reserved. <a href="/privacy-policy.html" style="color:inherit;">Privacy Policy</a> · <a href="/terms-of-service.html" style="color:inherit;">Terms of Service</a></span>
+      <span>Made with <span class="heartbeat">♥</span> for Yiddishe Kinderlach</span>
+    </div>
+  </div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="/firebase-init.js"></script>
+<script>window.CURRENT_PAGE = 'search';</script>
+<script src="/site.js"></script>
+<script>
+/* ===== JKH global search ===== */
+(function(){
+  const $ = id => document.getElementById(id);
+
+  /* ---------- text helpers ---------- */
+  const ALIAS = {
+    shabbat:'shabbos', shabbes:'shabbos', shabbath:'shabbos',
+    mitzvot:'mitzvos', mitzvah:'mitzvos', mitzva:'mitzvos', mitzvoth:'mitzvos',
+    mashiach:'moshiach', moshiah:'moshiach', mashiah:'moshiach',
+    hanukkah:'chanukah', hanukah:'chanukah', chanuka:'chanukah', hanuka:'chanukah', chanukka:'chanukah',
+    tora:'torah', toirah:'torah',
+    tefilah:'tefillah', tefila:'tefillah', tefilla:'tefillah', tfilla:'tefillah', tfillah:'tefillah',
+    halachot:'halachos', halacha:'halachos', halakha:'halachos', halachah:'halachos', halakhah:'halachos',
+    parsha:'parshah', parasha:'parshah', parashah:'parshah',
+    brachot:'brachos', berachot:'brachos', brachas:'brachos',
+    succos:'sukkos', sukkot:'sukkos', succot:'sukkos',
+    yomtov:'yom tov', sukka:'sukkah'
+  };
+  function norm(s){
+    s = String(s == null ? '' : s).toLowerCase();
+    if(s.normalize) s = s.normalize('NFD');
+    s = s.replace(/[̀-֑ͯ-ׇ]/g, '').replace(/['’‘`´]/g, '');
+    s = s.replace(/[^a-z0-9א-ת]+/g, ' ').trim();
+    return s.split(' ').filter(Boolean).map(w => ALIAS[w] || w).join(' ');
+  }
+  const stem = w => (w.length > 3 && /s$/.test(w) && !/ss$/.test(w)) ? w.slice(0, -1) : w;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const cssUrl = u => String(u || '').replace(/['"()\\\s]/g, c => encodeURIComponent(c));
+  const stripHtml = h => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#39;|&rsquo;/g, "'").replace(/\s+/g, ' ').trim();
+  const toList = v => Array.isArray(v) ? v.filter(Boolean).map(String) : (v ? String(v).split(',').map(x => x.trim()).filter(Boolean) : []);
+
+  /* ---------- turning database rows into searchable items ---------- */
+  const TORAH_RE = /\b(torah|chumash|parshah|mishna|mishnah|gemara|talmud|tanya|tehilim|tanach|nach|navi|neviim|halachos|mitzvos|shema|tefillah|brachos|siddur)\b/;
+  const MOSHIACH_RE = /\bmoshiach\b/;
+
+  function build(type, r, base){
+    const kw = toList(r.keywords).concat(toList(r.customs), toList(r.cast), toList(r.topics));
+    const it = Object.assign({
+      type: type, id: r.id, raw: r,
+      title: r.title || '', desc: base.desc || '', kw: kw, body: base.body || '',
+      num: (base.num === 0 || base.num) ? Number(base.num) : null,
+      thumb: base.thumb || '', href: base.href
+    }, base.extra || {});
+    it.nt = norm(it.title);
+    it.nk = norm(kw.join(' ') + ' ' + (r.question || ''));
+    it.nd = norm(it.desc);
+    it.nb = norm(it.body).slice(0, 8000);
+    const topicText = it.nt + ' ' + it.nk + ' ' + it.nd;
+    it.torah = type === 'halacha' || type === 'nach' || TORAH_RE.test(topicText);
+    it.moshiach = type === 'moshiach' || MOSHIACH_RE.test(topicText);
+    return it;
+  }
+  function buildItems(data){
+    const out = [];
+    (data.videos || []).forEach(v => {
+      if(v.series === 'kka') out.push(build('kka', v, {desc:v.synopsis, num:v.episode, thumb:v.thumbnailUrl, href:'/kka/episode/' + (v.slug || v.id)}));
+      else if(v.series === 'nach') out.push(build('nach', v, {desc:v.synopsis, thumb:v.thumbnailUrl, href:'/nach/episode/' + (v.slug || v.id)}));
+    });
+    (data.audio || []).forEach(a => out.push(build('moshiach', a, {desc:a.synopsis, num:a.episode, thumb:a.thumbnailUrl, href:'/moshiach.html'})));
+    (data.magazines || []).forEach(m => out.push(build('magazine', m, {desc:m.blurb, num:m.issue, thumb:m.coverUrl, href:m.pdfUrl || '/magazine.html', extra:{external:!!m.pdfUrl}})));
+    (data.halachos || []).forEach(h => out.push(build('halacha', h, {desc:h.summary, body:stripHtml(h.body), thumb:h.imageUrl, href:'/halachos/article/' + (h.slug || h.id)})));
+    return out;
+  }
+
+  /* ---------- query parsing ---------- */
+  const STOP = new Set(['the','a','an','of','and','in','on','to','for','is','at','by','with','about']);
+  function parseQuery(raw){
+    let s = String(raw || '').toLowerCase()
+      .replace(/#\s*(\d+)/g, ' num $1 ')
+      .replace(/\b(episode|ep|issue|number|no)\.?\s*(\d+)/g, ' $1 $2 ');
+    const toks = norm(s).split(' ').filter(Boolean);
+    const q = {words:[], nums:[], req:[], kind:null, hl:[]};
+    for(let i = 0; i < toks.length; i++){
+      const t = toks[i];
+      if(/^(episode|ep|num|number|no|issue)$/.test(t) && /^\d+$/.test(toks[i + 1] || '')){
+        q.req.push(Number(toks[i + 1]));
+        q.kind = (t === 'issue') ? 'issue' : ((t === 'episode' || t === 'ep') ? 'episode' : q.kind);
+        i++; continue;
+      }
+      if(/^\d+$/.test(t)){ q.nums.push(Number(t)); continue; }
+      q.words.push(t);
+    }
+    const kept = q.words.filter(w => !STOP.has(w));
+    if(kept.length) q.words = kept;
+    q.words = q.words.map(stem);
+    q.hl = String(raw || '').toLowerCase().replace(/[̀-֑ͯ-ׇ'’‘`´]/g, '').split(/[^a-z0-9א-ת]+/).filter(w => w.length > 1 && !STOP.has(w));
+    q.empty = !q.words.length && !q.nums.length && !q.req.length;
+    return q;
+  }
+
+  /* ---------- scoring ---------- */
+  const W = {nt:10, nk:7, nd:4, nb:1.5};
+  function fieldScore(text, tok){
+    if(!text) return 0;
+    const padded = ' ' + text + ' ';
+    if(padded.indexOf(' ' + tok + ' ') >= 0) return 1.3;
+    if(padded.indexOf(' ' + tok) >= 0) return 1;
+    if(tok.length >= 3 && text.indexOf(tok) >= 0) return 0.5;
+    return 0;
+  }
+  function score(it, q){
+    if(q.kind === 'issue' && it.type !== 'magazine') return 0;
+    if(q.kind === 'episode' && it.type === 'magazine') return 0;
+    let total = 0;
+    for(const n of q.req){ if(it.num !== n) return 0; total += 25; }
+    for(const n of q.nums){
+      const word = ' ' + n + ' ';
+      let hit = 0;
+      if(it.num === n) hit = 20;
+      else if((' ' + it.nt + ' ').indexOf(word) >= 0) hit = W.nt;
+      else if((' ' + it.nk + ' ').indexOf(word) >= 0) hit = W.nk;
+      else if((' ' + it.nd + ' ').indexOf(word) >= 0) hit = W.nd;
+      if(!hit) return 0;
+      total += hit;
+    }
+    for(const w of q.words){
+      let best = 0;
+      for(const f in W){ best = Math.max(best, fieldScore(it[f], w) * W[f]); }
+      if(!best) return 0;
+      total += best;
+    }
+    const phrase = q.words.join(' ');
+    if(q.words.length > 1 && it.nt.indexOf(phrase) >= 0) total += 8;
+    return total;
+  }
+
+  /* ---------- filters ---------- */
+  const FILTERS = [
+    {id:'all',       label:'All',          test:()=>true},
+    {id:'videos',    label:'Videos',       test:it=>it.type==='kka'||it.type==='nach'},
+    {id:'magazines', label:'Magazines',    test:it=>it.type==='magazine'},
+    {id:'halachos',  label:'Halachos',     test:it=>it.type==='halacha'},
+    {id:'nach',      label:'Nach Heroes',  test:it=>it.type==='nach'},
+    {id:'moshiach',  label:'Moshiach',     test:it=>it.moshiach},
+    {id:'torah',     label:'Torah',        test:it=>it.torah}
+  ];
+  const TYPE_ORDER = {kka:0, nach:1, halacha:2, magazine:3, moshiach:4};
+  const filterById = id => FILTERS.find(f => f.id === id) || FILTERS[0];
+
+  function run(items, q){
+    if(q.empty) return items.map(it => ({it:it, s:0}));
+    return items.map(it => ({it:it, s:score(it, q)})).filter(r => r.s > 0);
+  }
+  function sortResults(rs, q){
+    rs.sort((a, b) =>
+      (b.s - a.s) ||
+      ((TYPE_ORDER[a.it.type] || 0) - (TYPE_ORDER[b.it.type] || 0)) ||
+      ((b.it.num || 0) - (a.it.num || 0)) ||
+      (((a.it.raw && a.it.raw.order) || 0) - ((b.it.raw && b.it.raw.order) || 0)));
+    return rs;
+  }
+
+  /* ---------- rendering ---------- */
+  function highlight(text, hl){
+    const safe = esc(text);
+    if(!hl.length) return safe;
+    return safe.replace(new RegExp('(' + hl.map(escRe).join('|') + ')', 'gi'), '<mark class="s-hit">$1</mark>');
+  }
+  function snippet(it, q){
+    const hasHit = t => q.hl.some(w => String(t).toLowerCase().indexOf(w) >= 0);
+    let src = it.desc;
+    if((!src || (q.hl.length && !hasHit(src))) && it.body && q.hl.length && hasHit(it.body)){
+      const low = it.body.toLowerCase();
+      let idx = -1;
+      for(const w of q.hl){ idx = low.indexOf(w); if(idx >= 0) break; }
+      const start = Math.max(0, idx - 50);
+      src = (start > 0 ? '… ' : '') + it.body.slice(start, start + 150) + ' …';
+    }
+    src = src || '';
+    if(src.length > 150) src = src.slice(0, 150).trim() + '…';
+    return highlight(src, q.hl);
+  }
+  const BADGE = {kka:'KKA', nach:'Nach Heroes', halacha:'Halacha', magazine:'Magazine', moshiach:'Moshiach'};
+  function keywordChips(it, q){
+    if(!it.kw.length) return '';
+    const hit = k => q.hl.some(w => k.toLowerCase().indexOf(w) >= 0);
+    const ordered = it.kw.filter(hit).concat(it.kw.filter(k => !hit(k))).slice(0, 3);
+    return '<div class="s-kw">' + ordered.map(k => '<span class="chip">' + highlight(k, q.hl) + '</span>').join('') + '</div>';
+  }
+  function cardHtml(it, q){
+    const thumbBg = (extra) => it.thumb ? ` style="background-image:url('${cssUrl(it.thumb)}')${extra || ''}"` : '';
+    const title = '<h4>' + highlight(it.title, q.hl) + '</h4>';
+    const snip = snippet(it, q);
+    const synopsis = snip ? '<p class="card-synopsis">' + snip + '</p>' : '';
+    if(it.type === 'kka' || it.type === 'nach'){
+      const locked = isMembersOnlyLocked(it.raw), notReleased = isBeforeRelease(it.raw);
+      const dim = (locked || notReleased) ? ';filter:grayscale(60%) brightness(.75)' : '';
+      const overlay = notReleased ? releaseLockedOverlay() : (locked ? lockedThumbOverlay() : '<div class="play"><span>▶</span></div>');
+      const tags = (releaseBadgeHtml(it.raw) || membersOnlyBadgeHtml(it.raw)) ? '<div class="card-tags">' + releaseBadgeHtml(it.raw) + membersOnlyBadgeHtml(it.raw) + '</div>' : '';
+      return `<a class="card" href="${esc(it.href)}" style="display:block; text-decoration:none; color:inherit;">
+        <div class="card-thumb${it.type === 'nach' ? ' nach' : ''}"${thumbBg(dim)}>${it.type === 'kka' ? '<div class="ep-num">EP ' + (it.num == null ? '?' : it.num) + '</div>' : ''}<span class="s-badge">${BADGE[it.type]}</span>${overlay}</div>
+        <div class="card-body">${title}${synopsis}${keywordChips(it, q)}${tags}</div></a>`;
+    }
+    if(it.type === 'halacha'){
+      const locked = isMembersOnlyLocked(it.raw);
+      const tags = membersOnlyBadgeHtml(it.raw) ? '<div class="card-tags">' + membersOnlyBadgeHtml(it.raw) + '</div>' : '';
+      return `<a class="card" href="${esc(it.href)}" style="display:block; text-decoration:none; color:inherit;">
+        <div class="card-thumb"${thumbBg(locked ? ';filter:grayscale(60%) brightness(.75)' : '')}><span class="s-badge">${BADGE.halacha}</span>${locked ? lockedThumbOverlay() : ''}</div>
+        <div class="card-body">${title}${synopsis}${keywordChips(it, q)}${tags}</div></a>`;
+    }
+    if(it.type === 'magazine'){
+      return `<a class="card" href="${esc(it.href)}"${it.external ? ' target="_blank" rel="noopener"' : ''} style="display:block; text-decoration:none; color:inherit;">
+        <div class="card-thumb mag"${thumbBg()}><div class="ep-num">ISSUE ${it.num == null ? '?' : it.num}</div><span class="s-badge">${BADGE.magazine}</span></div>
+        <div class="card-body">${title}${synopsis}${keywordChips(it, q)}
+          <div class="s-links"><span class="pill-link">${it.external ? 'Read Issue' : 'See Magazine page'}</span></div></div></a>`;
+    }
+    // moshiach audio
+    const links = (it.raw.links || {});
+    const pills = [['spotify','Spotify'], ['youtube','YouTube Music'], ['drive','Google Drive']]
+      .filter(p => links[p[0]]).map(p => `<a class="pill-link" href="${esc(links[p[0]])}" target="_blank" rel="noopener">${p[1]}</a>`).join('')
+      || '<a class="pill-link" href="/moshiach.html">Open Moshiach page</a>';
+    return `<div class="card" style="cursor:default;">
+      <div class="card-thumb s-audio-art"${thumbBg()}><div class="ep-num">EP ${it.num == null ? '?' : it.num}</div><span class="s-badge">${BADGE.moshiach}</span>${it.thumb ? '' : '🎧'}</div>
+      <div class="card-body">${title}${synopsis}${keywordChips(it, q)}<div class="s-links">${pills}</div></div></div>`;
+  }
+
+  /* ---------- state + wiring ---------- */
+  let items = [], loaded = false, activeFilter = 'all', timer = null;
+  const MAX_SHOWN = 60;
+
+  function topSuggestions(){
+    const count = {};
+    items.forEach(it => it.kw.forEach(k => { const key = k.trim(); if(key && key.length <= 24) count[key] = (count[key] || 0) + 1; }));
+    return Object.keys(count).sort((a, b) => count[b] - count[a]).slice(0, 8);
+  }
+  function renderChips(counts){
+    $('sChips').innerHTML = FILTERS.map(f =>
+      `<button type="button" class="s-chip${f.id === activeFilter ? ' active' : ''}" data-f="${f.id}" aria-pressed="${f.id === activeFilter}">${f.label}<span class="n">${counts[f.id]}</span></button>`).join('');
+  }
+  function syncUrl(){
+    const p = new URLSearchParams();
+    const v = $('sInput').value.trim();
+    if(v) p.set('q', v);
+    if(activeFilter !== 'all') p.set('f', activeFilter);
+    const qs = p.toString();
+    try{ history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '')); }catch(e){}
+  }
+  function render(){
+    const raw = $('sInput').value;
+    $('sClear').hidden = !raw;
+    if(!loaded) return;
+    const q = parseQuery(raw);
+    const all = run(items, q);
+    const counts = {};
+    FILTERS.forEach(f => counts[f.id] = all.filter(r => f.test(r.it)).length);
+    renderChips(counts);
+    const filt = filterById(activeFilter);
+    const shown = sortResults(all.filter(r => filt.test(r.it)), q);
+    const grid = $('sGrid'), empty = $('sEmpty');
+    const browsing = q.empty && activeFilter === 'all';
+
+    $('sSuggest').innerHTML = '';
+    if(browsing){
+      grid.innerHTML = ''; empty.style.display = 'none';
+      $('sMeta').textContent = 'Type above to search, or pick a category to browse.';
+      const sug = topSuggestions();
+      if(sug.length) $('sSuggest').innerHTML = sug.map(k => `<button type="button" class="chip" data-q="${esc(k)}">${esc(k)}</button>`).join('');
+      return;
+    }
+    if(!shown.length){
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      $('sEmptyTitle').textContent = 'Nothing found';
+      $('sEmptyText').textContent = (activeFilter !== 'all' && all.length)
+        ? 'No matches in ' + filt.label + ' — try “All” to see ' + all.length + ' result' + (all.length === 1 ? '' : 's') + ' elsewhere.'
+        : 'Try a different word, or check the spelling.';
+      $('sMeta').textContent = '';
+      return;
+    }
+    empty.style.display = 'none';
+    $('sMeta').textContent = shown.length + ' result' + (shown.length === 1 ? '' : 's') + (q.empty ? '' : ' for “' + raw.trim() + '”') + (activeFilter !== 'all' ? ' in ' + filt.label : '');
+    grid.innerHTML = shown.slice(0, MAX_SHOWN).map(r => cardHtml(r.it, q)).join('');
+  }
+  function schedule(){ clearTimeout(timer); timer = setTimeout(() => { render(); syncUrl(); }, 120); }
+
+  $('sInput').addEventListener('input', schedule);
+  $('sForm').addEventListener('submit', e => { e.preventDefault(); render(); syncUrl(); $('sInput').blur(); });
+  $('sClear').addEventListener('click', () => { $('sInput').value = ''; render(); syncUrl(); $('sInput').focus(); });
+  $('sChips').addEventListener('click', e => {
+    const b = e.target.closest('.s-chip'); if(!b) return;
+    activeFilter = b.dataset.f; render(); syncUrl();
+  });
+  $('sSuggest').addEventListener('click', e => {
+    const b = e.target.closest('[data-q]'); if(!b) return;
+    $('sInput').value = b.dataset.q; render(); syncUrl();
+  });
+  onAuthChange(() => render());
+
+  /* ---------- loading the content (once per visit, cached briefly) ---------- */
+  const CACHE_KEY = 'jkh_search_cache_v1', CACHE_MS = 2 * 60 * 1000;
+  function readCache(){
+    try{ const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null'); if(c && Date.now() - c.t < CACHE_MS) return c.d; }catch(e){}
+    return null;
+  }
+  async function loadData(){
+    const cached = readCache(); if(cached) return cached;
+    const names = ['videos', 'audio', 'magazines', 'halachos'];
+    const snaps = await Promise.all(names.map(n => db.ref(n).once('value')));
+    const data = {};
+    names.forEach((n, i) => data[n] = snapToArray(snaps[i]));
+    try{ sessionStorage.setItem(CACHE_KEY, JSON.stringify({t: Date.now(), d: data})); }catch(e){}
+    return data;
+  }
+  function start(){
+    $('sGrid').innerHTML = skeletonCards(6);
+    $('sMeta').textContent = 'Loading…';
+    loadData().then(data => {
+      items = buildItems(data); loaded = true;
+      const p = new URLSearchParams(location.search);
+      if(p.get('q')) $('sInput').value = p.get('q');
+      if(p.get('f') && FILTERS.some(f => f.id === p.get('f'))) activeFilter = p.get('f');
+      $('sGrid').innerHTML = '';
+      render();
+    }).catch(() => {
+      $('sGrid').innerHTML = '';
+      $('sMeta').innerHTML = 'We couldn’t load the content just now. <button type="button" class="show-more-btn" id="sRetry">Try again</button>';
+      const r = $('sRetry'); if(r) r.onclick = start;
+    });
+  }
+  start();
+  window.__jkhSearch = {norm, parseQuery, buildItems, run, sortResults, score, FILTERS};
+})();
+</script>
+</body>
+</html>

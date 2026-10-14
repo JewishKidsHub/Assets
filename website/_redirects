@@ -1,0 +1,21 @@
+/go/*  /go.html  200
+/10  /10.html  200
+/reset  /reset-password.html  200
+/kka/episode/*  /kka-episode.html?id=:splat  200
+/nach/episode/*  /nach-episode.html?id=:splat  200
+/halachos/article/*  /halacha-article.html?id=:splat  200
+/admin  /admin.html  200
+/login  /login.html  200
+/profile  /profile.html  200
+/contact  /contact.html  200
+/kka  /kka.html  200
+/magazine  /magazine.html  200
+/nach-heroes  /nach-heroes.html  200
+/halachos  /halachos.html  200
+/moshiach  /moshiach.html  200
+/privacy-policy  /privacy-policy.html  200
+/terms-of-service  /terms-of-service.html  200
+/search  /search.html  200
+
+# Short links: anything that is not a real page or file above becomes yourdomain.com/name
+/*  /go.html  200
