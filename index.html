@@ -3,348 +3,263 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ask JKH – Jewish Kids Hub</title>
-<meta name="description" content="Ask the Jewish Kids Hub assistant about KKA, Nach Heroes, Halachos For Kids and the JKH magazine.">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<title>JKH AI</title>
 <style>
-  :root{
-    --orange:#FF9900;
-    --orange-deep:#E07B00;
-    --gold:#FFC83D;
-    --cream:#FFF8E7;
-    --ink:#2B2113;
-    --ink-soft:#6b5a43;
-    --line:#F0DDB0;
-  }
+  :root{--orange:#FF9900;--orange-deep:#E07B00;--gold:#FFC83D;--cream:#FFF8E7;--ink:#2B2113;--soft:#6b5a43}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{
-    font-family:'Nunito',system-ui,sans-serif;
-    background:var(--cream);
-    color:var(--ink);
-    display:flex;justify-content:center;
-  }
-  .app{
-    width:100%;max-width:760px;height:100dvh;
-    display:flex;flex-direction:column;
-    background:#fff;
-    border-left:3px solid var(--ink);border-right:3px solid var(--ink);
-  }
-  header{
-    background:var(--orange);
-    border-bottom:3px solid var(--ink);
-    padding:14px 18px;
-    display:flex;align-items:center;gap:14px;
-  }
-  .logo{
-    width:46px;height:46px;flex:none;
-    background:var(--ink);color:var(--gold);
-    display:grid;place-items:center;
-    font-family:'Fredoka',sans-serif;font-weight:700;font-size:20px;
-    transform:rotate(-4deg);
-    border-radius:6px;
-  }
-  header h1{font-family:'Fredoka',sans-serif;font-size:22px;line-height:1.1;color:var(--ink)}
-  header p{font-size:13px;font-weight:600;color:#4a2f00}
-  .pasuk{
-    background:var(--ink);color:var(--gold);
-    text-align:center;font-size:15px;padding:6px 10px;
-    direction:rtl;letter-spacing:.3px;
-  }
-  #chat{
-    flex:1;overflow-y:auto;padding:18px 16px 8px;
-    display:flex;flex-direction:column;gap:12px;
-    background:
-      linear-gradient(var(--cream),var(--cream));
-  }
-  .msg{max-width:86%;padding:11px 14px;font-size:16px;line-height:1.5;white-space:pre-wrap;animation:pop .18s ease-out}
-  .bot{
-    align-self:flex-start;background:#fff;
-    border:2px solid var(--ink);border-radius:4px 16px 16px 16px;
-    box-shadow:3px 3px 0 var(--orange);
-  }
-  .me{
-    align-self:flex-end;background:var(--gold);
-    border:2px solid var(--ink);border-radius:16px 4px 16px 16px;
-    font-weight:600;
-  }
-  .bot a{color:var(--orange-deep);font-weight:700}
-  .bot b{font-weight:700}
-  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .typing{display:flex;gap:5px;padding:14px 16px}
-  .typing span{width:8px;height:8px;background:var(--orange);border-radius:50%;animation:b 1s infinite}
-  .typing span:nth-child(2){animation-delay:.15s}
-  .typing span:nth-child(3){animation-delay:.3s}
-  @keyframes b{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:6px 16px 10px;background:var(--cream)}
-  .chip{
-    font-family:inherit;font-size:14px;font-weight:700;
-    background:#fff;color:var(--ink);
-    border:2px solid var(--ink);border-radius:999px;
-    padding:6px 13px;cursor:pointer;
-    transition:transform .08s, background .08s;
-  }
-  .chip:hover{background:var(--gold);transform:translateY(-1px)}
-  form{
-    display:flex;gap:10px;padding:12px 14px;
-    border-top:3px solid var(--ink);background:#fff;
-  }
-  input{
-    flex:1;font-family:inherit;font-size:16px;
-    padding:11px 14px;border:2px solid var(--ink);border-radius:10px;
-    background:var(--cream);color:var(--ink);outline:none;
-  }
-  input:focus{border-color:var(--orange-deep);background:#fff}
-  button.send{
-    font-family:'Fredoka',sans-serif;font-size:17px;font-weight:600;
-    background:var(--orange);color:var(--ink);
-    border:2px solid var(--ink);border-radius:10px;
-    padding:0 20px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);
-  }
-  button.send:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
-  footer{text-align:center;font-size:12px;color:var(--ink-soft);padding:6px 10px 10px;background:#fff}
-  @media (max-width:560px){
-    .app{border:none}
-    header h1{font-size:19px}
-    .msg{max-width:92%;font-size:15.5px}
-  }
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
+  header{background:var(--orange);border-bottom:3px solid var(--ink);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .logo{width:40px;height:40px;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-weight:800;border-radius:6px;transform:rotate(-4deg)}
+  header h1{font-size:20px;line-height:1.1}
+  header small{display:block;font-size:12px;font-weight:600;color:#4a2f00}
+  .spacer{flex:1}
+  button,select{font:inherit}
+  .hbtn{background:#fff;border:2px solid var(--ink);border-radius:8px;padding:5px 10px;font-weight:700;font-size:13px;cursor:pointer}
+  .status{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%;background:#999;border:2px solid var(--ink)}
+  .dot.ok{background:#2ecc40}.dot.bad{background:#e74c3c}.dot.work{background:var(--gold)}
+  .pasuk{background:var(--ink);color:var(--gold);text-align:center;font-size:14px;padding:5px;direction:rtl}
+  .modes{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;background:#fff;border-bottom:2px solid var(--ink)}
+  .mode{white-space:nowrap;font-weight:700;font-size:13px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .mode.on,.mode:hover{background:var(--gold)}
+  #chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;max-width:900px;width:100%;margin:0 auto}
+  .msg{max-width:88%;padding:11px 14px;font-size:15.5px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+  .me{align-self:flex-end;background:var(--gold);border:2px solid var(--ink);border-radius:14px 4px 14px 14px;font-weight:600}
+  .bot{align-self:flex-start;background:#fff;border:2px solid var(--ink);border-radius:4px 14px 14px 14px;box-shadow:3px 3px 0 var(--orange)}
+  .tools{margin-top:8px}
+  .tools button{font-size:12px;font-weight:700;background:var(--cream);border:2px solid var(--ink);border-radius:8px;padding:3px 9px;cursor:pointer}
+  .tools button:hover{background:var(--gold)}
+  .note{align-self:center;font-size:13px;color:var(--soft);text-align:center;max-width:640px;line-height:1.5}
+  .card{align-self:center;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:16px 20px;max-width:680px;width:100%;font-size:14.5px;line-height:1.6;box-shadow:4px 4px 0 var(--orange)}
+  .card h3{margin-bottom:6px;font-size:17px}
+  .card select{width:100%;padding:8px;border:2px solid var(--ink);border-radius:8px;margin:10px 0;background:var(--cream);font-size:14.5px}
+  .go{background:var(--orange);color:var(--ink);font-weight:800;border:2px solid var(--ink);border-radius:10px;padding:10px 20px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);font-size:15px}
+  .go:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .bar{height:16px;border:2px solid var(--ink);border-radius:8px;background:var(--cream);margin:12px 0 6px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--orange);transition:width .2s}
+  .small{font-size:12.5px;color:var(--soft)}
+  .err{color:#b3261e;font-weight:700}
+  form{padding:12px 14px;border-top:3px solid var(--ink);background:#fff}
+  .inner{display:flex;gap:10px;max-width:900px;width:100%;margin:0 auto}
+  textarea{flex:1;font:inherit;font-size:15px;padding:10px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--cream);resize:none;height:56px;outline:none}
+  textarea:focus{background:#fff;border-color:var(--orange-deep)}
+  textarea:disabled{opacity:.5}
+  .send{background:var(--orange);color:var(--ink);font-weight:800;border:2px solid var(--ink);border-radius:10px;padding:0 20px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+  .send:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="logo">JKH</div>
-    <div>
-      <h1>Ask JKH</h1>
-      <p>Your Jewish Kids Hub guide</p>
+
+<header>
+  <div class="logo">JKH</div>
+  <div><h1>JKH AI</h1><small>Runs inside this browser. Works offline after the first download.</small></div>
+  <div class="spacer"></div>
+  <div class="status"><span class="dot" id="dot"></span><span id="statusText">Not loaded</span></div>
+  <button class="hbtn" id="changeModel" type="button" style="display:none">Change model</button>
+  <button class="hbtn" id="clear" type="button">New chat</button>
+</header>
+<div class="pasuk">מפי עוללים ויונקים יסדת עוז</div>
+<div class="modes" id="modes"></div>
+
+<div id="chat"></div>
+
+<form id="form">
+  <div class="inner">
+    <textarea id="input" disabled placeholder="Load the AI first, then ask away. (Enter to send, Shift+Enter for a new line)"></textarea>
+    <button class="send" id="sendBtn" type="submit" disabled>Send</button>
+  </div>
+</form>
+
+<script type="module">
+/* ===========================================================
+   JKH AI – the model runs INSIDE the browser (WebLLM / WebGPU).
+   First time: it downloads the model (a few GB). The browser keeps it.
+   After that: no Wi-Fi needed. Nothing is ever sent anywhere.
+   To change how it behaves, edit JKH_RULES below.
+   =========================================================== */
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+const MODELS = [
+  {id:"Llama-3.2-3B-Instruct-q4f16_1-MLC",  label:"Fast, lighter (about 2 GB). Good for most computers"},
+  {id:"Llama-3.1-8B-Instruct-q4f16_1-MLC",  label:"Smarter, heavier (about 5 GB). Needs a stronger computer"},
+  {id:"Llama-3.2-1B-Instruct-q4f16_1-MLC",  label:"Tiny and quick (about 1 GB). Weakest answers"}
+];
+
+const JKH_RULES = `You are the Jewish Kids Hub (JKH) assistant, working for the JKH team.
+
+Jewish Kids Hub is a warm, joyful, Torah-centered educational platform for Yiddishe kinderlach. JKH exists to help Yiddishe kinderlach discover the special koach Hashem gave them to fill the world with Torah and light. A central message: "מפי עוללים ויונקים יסדת עוז". JKH focuses on Torah, mitzvos, Chassidus, sichos of the Rebbe, Yiddishkeit, the koach of children, Moshiach, Jewish history and learning. Do not describe JKH as a Zionist organisation.
+
+VOICE: Write naturally and warmly, like a real Chabad Yiddishe children's organisation. Use terms like Yiddishe kinderlach, Hashem, Torah, mitzvos, koach, Chassidus, the Rebbe, sichos, Yiddishkeit. Avoid generic AI-sounding language, corporate marketing language, excessive emojis, babyish writing, unnecessary exclamation marks, long explanations when a short answer will do, and random details nobody asked for. JKH is not only for little kids; content must also suit older kids and teenagers.
+
+KKA (Kids Kan Akomplish): presents Rebbe sichos and Chassidishe ideas simply and engagingly. KKA scripts: sound like real children talking, natural dialogue, not an adult lecture, include relevant sichos/Chassidishe ideas, realistic low-budget props, format as CHARACTER: dialogue on one line, stage directions in (parentheses), keep the story moving. Do not automatically make Yossi a teacher. Do not add iPads, phones or computers as props unless the story needs them.
+
+NACH HEROES: animated series teaching Nevi'im and Kesuvim. Tell the actual story accurately, understandable to kids, natural dialogue, include relevant mekoros, make Nach interesting not dry.
+
+MAGAZINE: for Yiddishe kinderlach, interesting enough for older kids. Sections may include What'sThat, Halachos For Kids, Nach Heroes, KKA, features, comics, quizzes.
+
+SOURCES (very important): Never invent a quotation, sicha, sicha date, sefer or source. If you are not sure of a source, write "[needs verification]" instead of guessing. For halacha, do not present uncertain information as a definitive ruling; say it should be checked with a Rov.
+
+BEHAVIOUR: Be direct. Start the work instead of explaining what you could do. Follow clear instructions exactly. If told "fix mistakes", only fix spelling, grammar, punctuation and obvious wording errors. If told "make it shorter", keep the key meaning. If told "make it sound normal", remove awkward or AI-sounding wording. Preserve exact wording the user wants kept. Do not add random features, characters, story details or ideas that were not requested. Titles: give a few natural, catchy, not-overly-childish options, not a huge list. If a needed detail is truly missing, ask one short question; otherwise decide and continue.`;
+
+const MODES = [
+  {id:"chat",   label:"Chat",                 hint:""},
+  {id:"kka",    label:"KKA script",           hint:"Write a KKA script. Follow the KKA format rules.\n\nTopic / sicha / idea:"},
+  {id:"nach",   label:"Nach Heroes",          hint:"Write a Nach Heroes script. Tell the real story accurately and mark any source you are unsure of with [needs verification].\n\nStory / perek:"},
+  {id:"mag",    label:"Magazine piece",       hint:"Write a magazine piece for JKH.\n\nSection and topic:"},
+  {id:"title",  label:"Titles",               hint:"Give me 5 title options (no more).\n\nFor:"},
+  {id:"fix",    label:"Fix mistakes",         hint:"Fix mistakes only (spelling, grammar, punctuation, obvious wording). Do not change the meaning or rewrite.\n\nText:"},
+  {id:"short",  label:"Make it shorter",      hint:"Make this shorter, keeping the important meaning.\n\nText:"},
+  {id:"normal", label:"Make it sound normal", hint:"Make this sound like something a real person wrote. Remove awkward or AI-sounding wording. Keep the meaning.\n\nText:"}
+];
+
+const $ = id => document.getElementById(id);
+const chat=$("chat"), input=$("input"), sendBtn=$("sendBtn");
+let engine=null, history=[], busy=false;
+
+/* ---------- offline support ---------- */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+try{ navigator.storage?.persist?.(); }catch{}
+
+/* ---------- modes ---------- */
+MODES.forEach(m=>{
+  const b=document.createElement("button");
+  b.type="button"; b.className="mode"+(m.id==="chat"?" on":""); b.textContent=m.label;
+  b.onclick=()=>{
+    document.querySelectorAll(".mode").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    if(m.hint && !input.disabled){ input.value=m.hint+" "; }
+    input.focus();
+  };
+  $("modes").appendChild(b);
+});
+
+/* ---------- ui helpers ---------- */
+function setStatus(kind,txt){ $("dot").className="dot "+kind; $("statusText").textContent=txt; }
+function addMsg(text,who){
+  const d=document.createElement("div"); d.className="msg "+who;
+  const span=document.createElement("span"); span.textContent=text; d.appendChild(span);
+  if(who==="bot"){
+    const t=document.createElement("div"); t.className="tools";
+    const c=document.createElement("button"); c.type="button"; c.textContent="Copy";
+    c.onclick=()=>{navigator.clipboard.writeText(span.textContent);c.textContent="Copied";setTimeout(()=>c.textContent="Copy",1200)};
+    t.appendChild(c); d.appendChild(t);
+  }
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+  return span;
+}
+function note(text){
+  const n=document.createElement("div"); n.className="note"; n.textContent=text; chat.appendChild(n);
+}
+
+/* ---------- loader card ---------- */
+function showLoader(msg){
+  chat.innerHTML="";
+  const hasGPU = !!navigator.gpu;
+  const card=document.createElement("div"); card.className="card"; card.id="loader";
+  if(!hasGPU){
+    card.innerHTML=`<h3>This browser can't run the AI</h3>
+      It needs WebGPU. Open this page in the latest <b>Chrome</b> or <b>Edge</b> on a computer (Safari and Firefox may not work yet), then try again.`;
+    chat.appendChild(card); setStatus("bad","No WebGPU"); return;
+  }
+  const saved=localStorage.getItem("jkh_model_id");
+  card.innerHTML=`<h3>Load the JKH AI</h3>
+    <div>The first time, it downloads the model into this browser. That uses a few GB of data and can take a while. After that it loads from this computer and works with Wi-Fi off.</div>
+    <select id="modelPick">${MODELS.map(m=>`<option value="${m.id}" ${m.id===saved?"selected":""}>${m.label}</option>`).join("")}</select>
+    <button class="go" id="loadBtn" type="button">Load AI</button>
+    <div id="progressWrap" style="display:none">
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="small" id="progressText">Starting…</div>
     </div>
-  </header>
-  <div class="pasuk">מפי עוללים ויונקים יסדת עוז</div>
-
-  <div id="chat" aria-live="polite"></div>
-  <div class="chips" id="chips"></div>
-
-  <form id="form" autocomplete="off">
-    <input id="input" type="text" placeholder="Ask about KKA, Nach Heroes, the magazine…" aria-label="Your question">
-    <button class="send" type="submit">Send</button>
-  </form>
-  <footer>© 5786 Jewish Kids Hub · jewishkidshub@gmail.com</footer>
-</div>
-
-<script>
-/* =====================================================================
-   JKH ASSISTANT – no API, no backend. Everything runs in the browser.
-
-   TO ADD OR EDIT ANSWERS: change the KNOWLEDGE list below.
-   Each entry:
-     id       – unique name
-     keys     – words/phrases that should trigger it (lowercase)
-     answer   – what the assistant says (use \n for a new line,
-                <b>bold</b> and <a href="">links</a> work)
-     follow   – (optional) suggested next questions shown as buttons
-   ===================================================================== */
-
-const CONTACT_EMAIL = "jewishkidshub@gmail.com";
-
-const KNOWLEDGE = [
-  {
-    id:"about",
-    keys:["what is jkh","jkh","jewish kids hub","about","who are you","who is jkh","what is this","what do you do","mission","purpose","website","site"],
-    answer:"Jewish Kids Hub is where Yiddishe kinderlach discover the special koach Hashem gave them to fill the world with Torah and light.\n\nJKH is an online content platform with videos, a magazine and more, all focused on Torah, mitzvos, Chassidus, the Rebbe's sichos and Yiddishkeit.",
-    follow:["What is KKA?","What is Nach Heroes?","Tell me about the magazine"]
-  },
-  {
-    id:"pasuk",
-    keys:["mipi olelim","מפי עוללים","olelim","yonkim","koach","power of kids","kids power","special koach","kinderlach koach"],
-    answer:"מפי עוללים ויונקים יסדת עוז\n\n\"From the mouths of Yiddishe kinderlach, Hashem established strength.\" It's the heart of JKH: kids have a real koach to bring Torah and light into the world.",
-    follow:["What is JKH?","What is KKA?"]
-  },
-  {
-    id:"kka",
-    keys:["kka","kids kan akomplish","kan akomplish","akomplish","accomplish","kka episode","episodes"],
-    answer:"<b>Kids Kan Akomplish (KKA)</b> presents the Rebbe's sichos and Chassidishe ideas in a simple, engaging way that kids can really understand. It's acted out by kids, with real stories and real conversations.",
-    follow:["What is Nach Heroes?","What is JKH?","How do I contact JKH?"]
-  },
-  {
-    id:"nach",
-    keys:["nach heroes","nach","navi","nevi'im","neviim","kesuvim","kesuvim","yehoshua","jericho","spies","animated","animation","tanach"],
-    answer:"<b>Nach Heroes</b> is an animated video series that teaches Nevi'im and Kesuvim in an engaging way. It tells the real story, with relevant sources, so Nach comes alive instead of feeling like a dry lesson.",
-    follow:["What is KKA?","Tell me about the magazine"]
-  },
-  {
-    id:"halachos",
-    keys:["halachos","halacha","halachos for kids","halachos daily","hd","laws","jewish law","what is halacha"],
-    answer:"<b>Halachos For Kids</b> is the JKH section that teaches halacha in a way kids can follow.\n\nFor a real halacha question about what to do in an actual situation, please ask your Rav or a Rov. This assistant can tell you about JKH, but it can't give a psak.",
-    follow:["What is KKA?","Tell me about the magazine"]
-  },
-  {
-    id:"magazine",
-    keys:["magazine","issue","issues","past issues","past magazine","chanukah magazine","kislev","tishrei","purim","pesach","shavuos","read","print","whatsthat","what'sthat","comics","quiz","quizzes"],
-    answer:"The <b>JKH Magazine</b> is made for Yiddishe kinderlach, and it's interesting enough for older kids and teenagers too.\n\nSections can include What'sThat, Halachos For Kids, Nach Heroes, Kids Kan Akomplish, feature articles, comics, quizzes and Chassidishe content.\n\nThere's also a Past Magazine Issues area on the website.",
-    follow:["What is Nach Heroes?","What is JKH?","How do I contact JKH?"]
-  },
-  {
-    id:"moshiach",
-    keys:["moshiach","moshiach is in our hands","geulah","redemption","ready for moshiach"],
-    answer:"<b>Moshiach Is in Our Hands</b> is a section of the JKH website. Moshiach is one of the central things JKH is about, and the message is that kinderlach have a real koach to help bring him.",
-    follow:["What is JKH?","What is KKA?"]
-  },
-  {
-    id:"rebbe",
-    keys:["rebbe","sicha","sichos","chassidus","chabad","lubavitch","chassidish"],
-    answer:"Sichos of the Rebbe and Chassidus are a big part of what JKH shares, especially through KKA, where the ideas are brought down to a kid's level.\n\nThis assistant doesn't quote sichos from memory. If you need a specific source or date, please check it in the original or ask a Rov or Mashpia.",
-    follow:["What is KKA?","What is JKH?"]
-  },
-  {
-    id:"sections",
-    keys:["sections","pages","menu","what's on","whats on","navigation","what can i find","areas","explore","where"],
-    answer:"The JKH website has:\n• Home\n• Kids Kan Akomplish\n• Nach Heroes\n• Halachos For Kids\n• Magazine\n• Past Magazine Issues\n• Moshiach Is in Our Hands\n• Contact Us",
-    follow:["What is KKA?","What is Nach Heroes?","Tell me about the magazine"]
-  },
-  {
-    id:"contact",
-    keys:["contact","email","e-mail","reach","message","get in touch","write to","phone","help","feedback","suggest","idea"],
-    answer:"You can reach JKH at <a href=\"mailto:"+CONTACT_EMAIL+"\">"+CONTACT_EMAIL+"</a>.",
-    follow:["What is JKH?","Sections on the website"]
-  },
-  {
-    id:"submit",
-    keys:["submit","send in","upload","my video","join","be in","participate","audition","star","act","appear"],
-    answer:"For anything like joining, sending something in, or being involved, please email <a href=\"mailto:"+CONTACT_EMAIL+"\">"+CONTACT_EMAIL+"</a> and the team will get back to you.",
-    follow:["What is KKA?","How do I contact JKH?"]
-  },
-  {
-    id:"age",
-    keys:["age","old","young","older kids","teen","teenager","teenagers","little kids","who is it for","audience","for kids"],
-    answer:"JKH is for Yiddishe kinderlach of all ages. It isn't just for little kids; the content is meant to be interesting for older kids and teenagers too.",
-    follow:["What is JKH?","Tell me about the magazine"]
-  },
-  {
-    id:"hello",
-    keys:["hi","hello","hey","shalom","shalom aleichem","good morning","good evening","sholom aleichem","hiya"],
-    answer:"Sholom Aleichem! What would you like to know about Jewish Kids Hub?",
-    follow:["What is JKH?","What is KKA?","What is Nach Heroes?","Tell me about the magazine"]
-  },
-  {
-    id:"thanks",
-    keys:["thanks","thank you","thx","great","awesome","cool","nice","yasher koach","yashar koach"],
-    answer:"Yasher koach! Anything else you want to ask?",
-    follow:["What is JKH?","How do I contact JKH?"]
-  }
-];
-
-const STARTERS = ["What is JKH?","What is KKA?","What is Nach Heroes?","Tell me about the magazine","Sections on the website","How do I contact JKH?"];
-
-const FALLBACKS = [
-  "I'm not sure about that one. I can tell you about JKH, KKA, Nach Heroes, Halachos For Kids and the magazine. For anything else, email <a href=\"mailto:"+CONTACT_EMAIL+"\">"+CONTACT_EMAIL+"</a>.",
-  "That's outside what I know. Try one of the buttons below, or email <a href=\"mailto:"+CONTACT_EMAIL+"\">"+CONTACT_EMAIL+"</a> and the team will help."
-];
-
-/* ---------- matching engine ---------- */
-const STOP = new Set(["the","a","an","is","are","what","whats","tell","me","about","of","to","do","does","i","can","you","how","on","in","it","and","or","for","my","please","with","jkh's"]);
-
-function norm(s){
-  return s.toLowerCase().replace(/['’`]/g,"'").replace(/[^a-z0-9'\u0590-\u05FF\s]/g," ").replace(/\s+/g," ").trim();
-}
-function stem(w){ return w.replace(/(ing|ed|es|s)$/,""); }
-function tokens(s){
-  return norm(s).split(" ").filter(w=>w && !STOP.has(w)).map(stem);
+    <div class="small" style="margin-top:10px">Keep this tab open while it downloads. If it's interrupted, click Load AI again and it carries on.</div>`;
+  chat.appendChild(card);
+  $("loadBtn").onclick=()=>loadModel($("modelPick").value);
+  setStatus("","Not loaded");
 }
 
-function lev(a,b){
-  if(Math.abs(a.length-b.length)>2) return 9;
-  const m=[];
-  for(let i=0;i<=a.length;i++){m[i]=[i]}
-  for(let j=0;j<=b.length;j++){m[0][j]=j}
-  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++){
-    m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
-  }
-  return m[a.length][b.length];
-}
-
-function score(entry,q,qTokens){
-  let s=0;
-  for(const key of entry.keys){
-    const k=norm(key);
-    if(!k) continue;
-    // whole phrase found in question
-    const re=new RegExp("(^|\\s)"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(\\s|$)");
-    if(re.test(q)){ s+=3+k.split(" ").length; continue; }
-    // token level (with typo tolerance on longer words)
-    const kt=tokens(k);
-    for(const t of kt){
-      for(const qt of qTokens){
-        if(qt===t) s+=1.5;
-        else if(t.length>=5 && qt.length>=5 && lev(qt,t)<=1) s+=1;
+async function loadModel(modelId){
+  localStorage.setItem("jkh_model_id",modelId);
+  $("loadBtn").disabled=true; $("modelPick").disabled=true;
+  $("progressWrap").style.display="block";
+  setStatus("work","Loading…");
+  try{
+    if(engine){ try{ await engine.unload(); }catch{} engine=null; }
+    engine = await webllm.CreateMLCEngine(modelId,{
+      initProgressCallback:(p)=>{
+        const pct=Math.round((p.progress||0)*100);
+        $("barFill").style.width=pct+"%";
+        $("progressText").textContent=(p.text||"Loading…");
       }
-    }
+    });
+    ready(modelId);
+  }catch(e){
+    console.error(e);
+    setStatus("bad","Failed");
+    const p=$("progressText");
+    if(p){ p.className="small err"; p.textContent="Couldn't load: "+(e.message||e)+". Try the smaller model, or close other tabs and try again."; }
+    $("loadBtn").disabled=false; $("modelPick").disabled=false;
   }
-  return s;
 }
 
-function answer(text){
-  const q=norm(text);
-  const qTokens=tokens(text);
-  if(!q) return null;
-  let best=null,bestScore=0;
-  for(const e of KNOWLEDGE){
-    const sc=score(e,q,qTokens);
-    if(sc>bestScore){bestScore=sc;best=e}
-  }
-  return bestScore>=1.5 ? best : null;
+function ready(modelId){
+  chat.innerHTML=""; history=[];
+  note("Pick a task above or just type. Everything runs inside this browser. Always check sources and halachos before using anything.");
+  input.disabled=false; sendBtn.disabled=false;
+  input.placeholder="What do you need?  (Enter to send, Shift+Enter for a new line)";
+  $("changeModel").style.display="inline-block";
+  setStatus("ok","Ready");
+  input.focus();
 }
 
-/* ---------- UI ---------- */
-const chat=document.getElementById("chat");
-const chips=document.getElementById("chips");
-const form=document.getElementById("form");
-const input=document.getElementById("input");
-let fbIndex=0;
-
-function add(html,who){
-  const d=document.createElement("div");
-  d.className="msg "+who;
-  if(who==="me") d.textContent=html; else d.innerHTML=html;
-  chat.appendChild(d);
-  chat.scrollTop=chat.scrollHeight;
-  return d;
-}
-function setChips(list){
-  chips.innerHTML="";
-  list.forEach(t=>{
-    const b=document.createElement("button");
-    b.type="button";b.className="chip";b.textContent=t;
-    b.onclick=()=>ask(t);
-    chips.appendChild(b);
-  });
-}
-function ask(text){
-  text=text.trim();
-  if(!text) return;
-  add(text,"me");
+/* ---------- sending ---------- */
+async function send(text){
+  if(busy||!engine||!text.trim()) return;
+  busy=true; sendBtn.textContent="Stop";
+  addMsg(text,"me");
+  history.push({role:"user",content:text});
   input.value="";
-  chips.innerHTML="";
-  const t=document.createElement("div");
-  t.className="msg bot typing";
-  t.innerHTML="<span></span><span></span><span></span>";
-  chat.appendChild(t);
-  chat.scrollTop=chat.scrollHeight;
-  setTimeout(()=>{
-    t.remove();
-    const hit=answer(text);
-    if(hit){
-      add(hit.answer,"bot");
-      setChips(hit.follow||STARTERS);
-    }else{
-      add(FALLBACKS[fbIndex++%FALLBACKS.length],"bot");
-      setChips(STARTERS);
+  const out=addMsg("…","bot");
+  let full="";
+  try{
+    const stream=await engine.chat.completions.create({
+      stream:true,
+      temperature:0.7,
+      messages:[{role:"system",content:JKH_RULES},...history]
+    });
+    for await(const chunk of stream){
+      const d=chunk.choices[0]?.delta?.content||"";
+      if(d){ full+=d; out.textContent=full; chat.scrollTop=chat.scrollHeight; }
     }
-  },450);
+    history.push({role:"assistant",content:full});
+  }catch(e){
+    if(full){ history.push({role:"assistant",content:full}); out.textContent=full+"\n\n[stopped]"; }
+    else{ out.textContent="Something went wrong: "+(e.message||e); history.pop(); }
+  }
+  busy=false; sendBtn.textContent="Send";
 }
-form.addEventListener("submit",e=>{e.preventDefault();ask(input.value)});
 
-add("Sholom Aleichem! I'm the Jewish Kids Hub guide. Ask me about KKA, Nach Heroes, Halachos For Kids or the magazine.","bot");
-setChips(STARTERS);
+$("form").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(busy){ engine?.interruptGenerate(); return; }
+  send(input.value);
+});
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); if(!busy) send(input.value); }
+});
+$("clear").onclick=()=>{
+  if(busy) engine?.interruptGenerate();
+  if(engine){ ready(); } else showLoader();
+};
+$("changeModel").onclick=async()=>{
+  if(busy) engine?.interruptGenerate();
+  input.disabled=true; sendBtn.disabled=true;
+  $("changeModel").style.display="none";
+  showLoader();
+};
+
+showLoader();
 </script>
 </body>
 </html>
